@@ -1,0 +1,63 @@
+<li id="post_container_{{_id}}" class="post {{type}}">
+    <!-- AVATAR -->
+    <a href="/profile/{{owner}}/" class="post_avatar show_mini">
+        <img src="{{thumbnail}}">
+    </a>
+    <!-- POINTS RIBBON-->
+    <!-- only post with images or videos will be eleigible for points-->
+    <div class="points">
+        <h3 class="pointValue">{{points}}</h3>points
+        <!-- VOTE-->
+        <!-- VOTE UP-->
+        <a href="#" id="add_point" class="vote_up">
+            <img src="/images/core/icon_vote_up.png">
+        </a>
+        <!-- VOTE DOWN-->
+        <a href="#" id="remove_point" class="vote_down">
+            <img src="/images/core/icon_vote_down.png">
+        </a>
+    </div>
+    <!-- TITLE-->
+    <h3>
+        <a href="/profile/{{owner}}/">{{owner}}</a> {{title}}
+    </h3>
+    <!-- BODY -->
+    <div class="contents">
+        {{post}}
+    </div>
+    <!-- IMAGES & VIDEO-->
+    <div class="images">
+        {{if images}}
+        {{each images}}
+        <div class="image">
+            <a href="/uploads/{{$index}}" class="view_image">
+                <img src="/uploads/th_{{$index}}">
+            </a>
+        </div>
+        {{/each}}
+        {{/if}}
+        {{if video}}
+        {{if video.video_url}}
+        <div class="video">
+            <a href="{{video.video_url}}" id="video_{{_id}}" class="video_player"></a>
+        </div>
+        {{/if}}
+        {{/if}}
+    </div>
+    <!-- POST FOOTER-->
+    <div class="date">
+        <!-- SOCIAL SHARING-->
+        <a href="http://www.twitter.com/share?url=http://evilego.com/post/{{owner}}/{{_id}}/" class="twitter-share-button">
+            <img src="/images/profile/icon_twitter.png">
+        </a>
+        <a href="http://evilego.com/post/{{owner}}/{{_id}}/" title="{{title}}" class="facebook-share-button">
+            <img src="/images/profile/icon_facebook.png" alt="Share">
+        </a>
+        <!-- DATE-->
+    posted {{prettyDate}} &nbsp;
+        <!-- REMOVE POST-->
+    </div>
+    <!-- COMMENTS ABOUT POST-->
+    <div class="comments_container">
+    </div>
+</li>
