@@ -1,29 +1,28 @@
 UserModel = Backbone.Model.extend({
-    initialize: function(defaults) {
+    defaults: {
+        user: ''
+      , password: ''
+    }
+  , initialize: function(defaults) {
         console.log("init model: user")
+        _.bindAll(this,'authenticate','url')
         if (defaults && 'object' === typeof(defaults))
             this.set(defaults)
     }
   , authenticate: function(success,fail) {
-        var deferred = $.Deferred().done(success).fail(fail)
-        if ('' == this.get('login')) return deferred.rejectWith(this,'No login name')
+        if ('' == this.get('login')) return fail('No login name')
 
         $.ajax({
             url: this.url()+'/authenticate'
           , type: "POST"
           , data: "password="+this.get('password')
           , success: function(data) {
-              if (data.success)
-                deferred.resolveWith(self,data.data)
-              else deferred.rejectWith(self,data.error||'An error occurred')
+              success(new PlayerModel(data))
             }
-          , failed: function() {deferred.rejectWith(self,'An error occurred')}
+          , error: function(res) {fail(res.responseText)}
         })
     }
   , url: function() {
-        return '/user/'+this.get('login')
-    }
-  , getNewsFeed: function() {
-        EvilEgo.collection.newsFeed = new PostCollection('newsfeed')
+        return EvilEgo.dataHost+'/user/'+this.get('login')
     }
 })

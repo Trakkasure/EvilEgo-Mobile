@@ -14,7 +14,6 @@
 	<!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
 	<script type="text/javascript" charset="utf-8" src="phonegap-1.2.0.js"></script>
     <script src="js/jquery.min.js"></script>
-    <script src="js/jquery.tmpl.min.js"></script>
     <!-- 
     <script src="js/json2.js"></script>
     -->
@@ -26,11 +25,10 @@
 
 	// If you want to prevent dragging, uncomment this section
 	/* */
-	function preventBehavior(e) 
-	{ 
+	function preventBehavior(e) { 
       e.preventDefault(); 
-    };
-	document.addEventListener("touchmove", preventBehavior, false);
+    }
+	//document.addEventListener("touchmove", preventBehavior, false);
 	/* */
 	
 	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
@@ -110,8 +108,8 @@
       <div id="loginForm">
           <form action="#user/login" onsubmit="return false">
               <div class="error"></div>
-              <input type="text" id="login" name='login' placeholder="Login Name" /> <br />
-              <input type="password" id="password" name='password' /> <br />
+              <input type="text" id="login" name="login" placeholder="Login Name" /> <br />
+              <input type="password" id="password" name="password" /> <br />
               <button id="loginSubmit">Login</button>
           </form>
       </div>
@@ -119,65 +117,87 @@
       </div>
   </body>
 
-  <script type="text/javascript">
-      var EvilEgo = {
-              currentUser : false
-            , models      : {}
-            , collections : {}
-            , flags       : {}
-            , templates   : {}
-          }
-      function requestData(req,success, fail) {
-        if (!EvilEgo.currentUser) return
+    <script type="text/javascript">
+        // this sets up the Backbone model to use Mongo's _id
+        // put this somewhere in your client Backbone application
+        // when it fetches, the MongoDB ID is effectively mapped to the Backbone model correctly
+        // https://github.com/documentcloud/backbone/issues/37
+        var oldSet = Backbone.Model.prototype.set;
+        _.extend(Backbone.Model.prototype, {
+            set: function(attrs, options) {
+                if ('_id' in attrs) this.id = attrs._id
+                oldSet.apply(this, [attrs, options])
+                return this
+            }
+        })
+        var EvilEgo = {
+                  currentUser : false
+                , dataHost    : 'http://mobile.evilego.com:4000'
+                //, dataHost    : 'http://192.168.5.98:4000'
+                , models      : {}
+                , collections : {}
+                , flags       : {}
+                , templates   : {}
+        }
+        function requestData(req,success, fail) {
+            if (!EvilEgo.currentUser) return
 
-      }
-      function getTemplate(file,addId,cb) {
-          if ('function' === typeof addId) {
-              cb = addId
-              add = false
-          }
-          if (!cb && !addId) return
-          if (EvilEgo.templates[file]) {
-              if (addId && $('#addId').length==0)
-                $('head').append('<script id="'+addId+'" type="text/x-jquery-tmpl">').append(EvilEgo.templates[file])
-              if (cb) cb(EvilEgo.templates[file])
-              return
-          }
-          if (!PhoneGap.available || file.indexOf('http://')>=0) {
-              if (!addId) 
-                  addId='script-'+$('script').length
-              $.get(file,function(data){
-                  $('head').append('<script id="'+addId+'" type="text/x-jquery-tmpl">').html(data)
-              },'text/html').error(function() {
-                  console.log('Error occured downloading template file "%s"',file)
-              })
-          }
-          var reader = new FileReader();
-              reader.onloadend = function(evt){
-              console.log('Loaded Template: '+file)
-              EvilEgo.templates[file]=evt.target.result
-              $.get(file)
-              if (addId) $('head').append('<script id="'+addId+'" type="text/x-jquery-tmpl">').append(evt.target.result)
-              if (cb)
-                  cb(evt.target.result)
-          }
-          reader.readAsText(file);
-      }
-      function getFile(file,cb) {
-          var reader = new FileReader();
-          reader.onloadend = function(evt){
-              if (cb)
-                  cb(evt.target.result)
-          }
-          reader.readAsText(file);
-      }
-  </script>
-  <script src="model/user.js"></script>
-  <script src="model/post.js"></script>
-  <script src="view/user.js"></script>
-  <script src="view/post.js"></script>
-  <script src="routes-user.js"></script>
-  <script src="routes-post.js"></script>
+        }
+        function getTemplate(file,addId,cb) {
+            if ('function' === typeof addId) {
+                cb = addId
+                add = false
+            }
+            if (!cb && !addId) return
+            console.log('getTemplate: %s',file)
+            if (EvilEgo.templates[file]) {
+                if (addId && $('#addId').length==0)
+                  $('head').append('<script id="'+addId+'" type="text/x-jquery-tmpl">').append(EvilEgo.templates[file])
+                if (cb) cb(EvilEgo.templates[file])
+                return
+            }
+            if (!PhoneGap.available || file.charAt(0)=='/' || file.indexOf('http://')>=0) {
+                if (!addId) 
+                    addId='script-'+$('script').length
+                $.get(file).done(function(data){
+                    console.log('Loaded file: %s',file)
+                    EvilEgo.templates[file] = data
+                    console.log($('head').append('<script id="'+addId+'" type="text/x-jquery-tmpl">'))
+                    $('script#'+addId).html(data)
+                }).error(function(err) {
+                    console.log('Error occured downloading template file "%s":%s',file)
+                    console.log(err)
+                })
+            } else {
+                var reader = new FileReader();
+                reader.onloadend = function(evt){
+                    console.log('Loaded Template: '+file)
+                    EvilEgo.templates[file]=evt.target.result
+                    if (addId) $('head').append('<script id="'+addId+'" type="text/x-jquery-tmpl">').append(evt.target.result)
+                    if (cb)
+                        cb(evt.target.result)
+                }
+                reader.readAsText(file);
+            }
+        }
+        function getFile(file,cb) {
+            var reader = new FileReader();
+            reader.onloadend = function(evt){
+                if (cb)
+                    cb(evt.target.result)
+            }
+            reader.readAsText(file);
+        }
+    </script>
+    <script src="js/jquery.tmpl.min.js"></script>
+    <script src="model/user.js"></script>
+    <script src="model/player.js"></script>
+    <script src="model/post.js"></script>
+    <script src="view/user.js"></script>
+    <script src="view/player.js"></script>
+    <script src="view/post.js"></script>
+    <script src="routes-user.js"></script>
+    <script src="routes-post.js"></script>
 
 
 </html>

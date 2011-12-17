@@ -1,54 +1,69 @@
 PostView = Backbone.View.extend({
-    template: ''
+    tagName: 'li'
   , events: {
         'click #add_point': 'addPoint'
       , 'click #remove_point': 'removePoint'
     }
-  , initialize: function(model) {
-      this.model = model
+  , initialize: function() {
       var self = this
-      getTemplate('templates/post.html','postListTemplate',function(data) {
-          self.template = $.tmpl($('#postListTemplate'))
-      })
+      console.log('New post view')
       this.model.bind('change:points','pointsChange')
+      this.template = $('#postListTemplate').html()
     }
   , pointsChange: function() {
-      $('li#'+this.model._id+' .pointValue').html(this.model.points)
+      $('li#'+this.model.get('_id')+' .pointValue').html(this.model.points)
     }
   , render: function() {
-      return $.tmpl(this.template,this.model.toJSON())
+      //console.log('Rendering post ' + this.get('title'))
+      //$(this.el).html(this.model.get('title'))
+      $(this.el).html($.tmpl(this.template,this.model.toJSON()))
+      $(this.el).attr('id',this.model.get('_id'))
+      return this
+    }
+  , remove: function() {
+      this.collection.remove(this.model)
     }
   , addPoint: function() {
       this.model.addPoint()
     }
-  , addPoint: function() {
+  , removePoint: function() {
       this.model.removePoint()
     }
 
 })
+getTemplate('templates/post.html','postListTemplate')
 
-PostListView = Backbone.View.extend({
-    el: $('#postList')
+// This is the container for the list of posts
+PostListView = Backbone.Collection.extend({
+    el: $('body')
+  , tagName: 'div'
   , events: {
         'click #addPost': 'newPost'
     }
   , initialize: function(collection){
-      _.bindAll(this, 'render', 'newPost', 'addPost', 'appendPost'); // remember: every function that uses 'this' as the current object should be in here
-      this.collection = collection
-      this.collection.bind('add', this.appendPost); // collection event binder
+        _.bindAll(this, 'render', 'newPost', 'appendPost','removePost'); // remember: every function that uses 'this' as the current object should be in here
+        this.collection = collection
+        this.collection.bind('add', this.appendPost) // collection event binder
+        this.collection.bind('remove',this.removePost)
+        this.collection.bind('change',this.render)
+        this.collection.bind('reset',this.render)
     }
-  , addPost: function(post){ // adding a model to a view. Converts to a view object and appends the view
-      this.collection.add(post); // add item to collection; view is updated via event 'add'
+  , appendPost: function(post,collection){
+        $('ul', this.el).append((new PostView({model:post})).render().el)
     }
-  , appendPost: function(post){
-      $('ul', this.el).append(post.render())
+  , removePost: function(post,collection) {
+        $('ul li#'+post.id).remove()
     }
   , newPost: function() {
-      window.location.hash = '#post/new'
+        window.location.hash = '#post/new'
     }
   , render: function() {
-        this.el.children().remove()
-        _(this.models).each(function(post){this.el.append(post.render())})
+        console.log('Render list view')
+        this.el.empty() // clear list
+        this.el.append('<ul></ul>')
+        _(this.collection.models).each(function(post){ // iterate the post models
+            this.appendPost(post,this.collection) // append the models
+        },this)
     }
 })
 

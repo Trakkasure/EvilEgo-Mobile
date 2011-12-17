@@ -1,39 +1,53 @@
 PostModel = Backbone.Model.extend({
     defaults: {
-        '_id': '-'
-      , title: 'Default Title'
+        title: 'Default Title'
       , owner: 'Nobody'
       , post:  'This is an empty post'
       , isEmpty: true
     }
   , initialize: function(defaults) {
-        console.log("init model: user")
+        //console.log("init model: post")
+        console.log(defaults)
         if (defaults && 'object' === typeof(defaults))
             this.set(defaults)
     }
   , addPoint: function() {
+        $.get('/post/'+this.get('_id')+'/vote/1').done(function(data){
+            var points = data.points
+            this.set({points:points})
+        })
     }
   , removePoint: function() {
+        $.get('/post/'+this.get('_id')+'/vote/-1').done(function(data){
+            var points = data.points
+            this.set({points:points})
+        })
     }
   , url: function() {
-      return '/post/'+this.get('_id')
+      return '/post/'+this.get('owner')+'/'+this.get('_id')
     }
 })
 
 PostCollection = Backbone.Collection.extend({
-    type: ''
+    type: 'newsfeed'
   , model: PostModel
 
-  , initialize: function(args) {
-      this.type = args.type
+  , initialize: function() {
     }
-  , fetchPosts: function(option) {
+  , setType: function(type) {
+        this.type = type
+    }
+  , fetchPosts: function(player) {
+        console.log('Fetching posts for '+player)
+        var self = this
         switch(this.type) {
             case 'newsfeed':
-                this.url='/newsfeed/'+option||EvilEgo.loggedInUser.get('login')
-                this.fetch()
+                this.url = EvilEgo.dataHost+'/user/'+(player||EvilEgo.loggedInUser.get('login'))+'/newsfeed'
+                this.trigger('loading')
+                this.fetch({success: function(){self.trigger('load_done')},error: function(err) {self.trigger('load_error')}})
             break
         }
+        return this
     }
 })
 
