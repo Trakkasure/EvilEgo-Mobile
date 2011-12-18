@@ -57,7 +57,7 @@
 	function onDeviceReady() {
 		// do your thing!
         console.log('onDeviceReady')
-		if (navigator.notification) navigator.notification.alert("PhoneGap is working")
+		//if (navigator.notification) navigator.notification.alert("PhoneGap is working")
 
         // First thing to do is to get the user's stored mobile login token, if there is one. otherwise we will ask them ot log in.
         // var db = window.openDatabase("EvilEgo", "1.0", "EvilEgo Local Storage", 200000);
@@ -67,8 +67,9 @@
             var lastLoginUser = null
 
             if (lastLogin) {
-                lastLoginUser = window.localStorage.getItem(lastLogin)
-                $('#loginForm input[name="login"]').value(lastLogin)
+                EvilEgo.currentUser = lastLogin
+                EvilEgo.loggedInUser = window.localStorage.getItem(lastLogin)
+                $('#loginForm input[name="login"]').val(lastLogin)
             }
         }
 
@@ -103,7 +104,7 @@
     </script>
 
   </head>
-  <body>
+  <body style="-webkit-user-select: none; -webkit-touch-callout: none;">
       <h1>Login to EvilEgo</h1>
       <div id="loginForm">
           <form action="#user/login" onsubmit="return false">
@@ -133,7 +134,7 @@
         var EvilEgo = {
                   currentUser : false
                 , dataHost    : 'http://mobile.evilego.com:4000'
-                //, dataHost    : 'http://192.168.5.98:4000'
+                //, dataHost    : 'http://192.168.6.24:4000'
                 , models      : {}
                 , collections : {}
                 , flags       : {}
@@ -198,6 +199,9 @@
     <script src="view/post.js"></script>
     <script src="routes-user.js"></script>
     <script src="routes-post.js"></script>
+    <script type="text/javascript">
+        Backbone.history.start()
+    </script>
 
 
 </html>

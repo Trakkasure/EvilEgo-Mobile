@@ -62,3 +62,16 @@ CommentCollection = Backbone.Collection.extend({
     model: CommentModel
 })
 
+
+PostFormModel = Backbone.Model.extend({
+    defaults: {
+        owner:'Nobody'
+      , missions: []
+    }
+  , url: function() {
+        return EvilEgo.dataHost+'/post/'+this.get('owner')+'/new'
+    }
+  , initialize: function(defaults) {
+        this.set(defaults)
+    }
+})
