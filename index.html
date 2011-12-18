@@ -1,131 +1,121 @@
 <!DOCTYPE html>
 <html>
-  <head>
-  <title></title>
-  
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
-	<meta charset="utf-8">
+    <head>
+        <title></title>
+	<meta name="viewport" content="width=device-width, initial-scale=1"> 
+        <link rel="stylesheet" href="css/core.css" type="text/css" />
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" />
 
+        <!-- iPad/iPhone specific css below, add after your main css >
+        <link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />		
+        <link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />		
+        -->
+        <!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
+        <script type="text/javascript" charset="utf-8" src="phonegap-1.2.0.js"></script>
+        <script src="js/jquery.min.js"></script>
+        <script src="js/underscore-min.js"></script>
+        <script src="js/backbone-min.js"></script>
+        <script src="js/json2.js"></script>
 
-	<!-- iPad/iPhone specific css below, add after your main css >
-	<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />		
-	<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />		
-	-->
-	<!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
-	<script type="text/javascript" charset="utf-8" src="phonegap-1.2.0.js"></script>
-    <script src="js/jquery.min.js"></script>
-    <!-- 
-    <script src="js/json2.js"></script>
-    -->
-    <script src="js/underscore-min.js"></script>
-    <script src="js/backbone-min.js"></script>
-    <script src="js/json2.js"></script>
-        
-    <script type="text/javascript">
-
-
-	// If you want to prevent dragging, uncomment this section
-	/* */
-	function preventBehavior(e) { 
-      e.preventDefault(); 
-    }
-	//document.addEventListener("touchmove", preventBehavior, false);
-	/* */
-	
-	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
-	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
-	for more details -jm */
-	/*
-	function handleOpenURL(url)
-	{
-		// TODO: do something with the url passed in.
-	}
-	*/
-	    
-    document.addEventListener("deviceready", onDeviceReady, false);
-    $(function() {
-        console.log('On body load')
-        if (!window.device||!window.device.phonegap) {
-            console.log('Running outside of mobile device')
-            onDeviceReady()
-        }
-	})
-	
-	/* When this function is called, PhoneGap has been initialized and is ready to roll */
-	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
-	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
-	for more details -jm */
-
-	function onDeviceReady() {
-		// do your thing!
-        console.log('onDeviceReady')
-		//if (navigator.notification) navigator.notification.alert("PhoneGap is working")
-
-        // First thing to do is to get the user's stored mobile login token, if there is one. otherwise we will ask them ot log in.
-        // var db = window.openDatabase("EvilEgo", "1.0", "EvilEgo Local Storage", 200000);
-
-        if (window.localStorage) {
-            var lastLogin = window.localStorage.getItem('lastLogin')
-            if (lastLogin === 'undefined') lastLogin = null
-            var lastLoginUser = null
-
-            if (lastLogin) {
-                EvilEgo.currentUser = lastLogin
-                EvilEgo.loggedInUser = JSON.parse(window.localStorage.getItem(lastLogin))
-                $('#loginForm input[name="login"]').val(lastLogin)
+        <script type="text/javascript">
+            
+            // If you want to prevent dragging, uncomment this section
+            function preventBehavior(e) {
+                e.preventDefault(); 
             }
-        }
-
-
-        sameOrigin = location.origin
-        EvilEgo.dataHost = (window.device&&window.device.phonegap)?'http://mobile.evilego.com:4000':sameOrigin
-
-        Login = new LoginView ({model: new UserModel({login:EvilEgo.currentUser||''})})
-
-        //tx.executeSql("SELECT value FROM settings where name='lastLogin'", [], function(tx, results) {
-            // this will be empty since no rows were inserted.
-            /* This is here to know what to look for later when doing more DB manipulation 
-            console.log("Login ID = " + results.insertId);
-            // this will be 0 since it is a select statement
-            console.log("Rows Affected = " + results.rowAffected);
-            // the number of rows returned by the select statement
-            console.log("Insert ID = " + results.rows.length);
+            //document.addEventListener("touchmove", preventBehavior, false);
             /* */
-        /*
-                if (results.rows.length>=0) {
-                    tx.executeSql("SELECT * FROM user where login=%d", [results[0].value], function(tx, results) {
-                    }, function(err) {
-                    })
+
+            /* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
+            see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
+            for more details -jm */
+            /*
+            function handleOpenURL(url)
+            {
+                    // TODO: do something with the url passed in.
+            }
+            */
+
+            document.addEventListener("deviceready", onDeviceReady, false);
+            $(function() {
+                console.log('On body load')
+                if (!window.device||!window.device.phonegap) {
+                    console.log('Running outside of mobile device')
+                    onDeviceReady()
                 }
-        }, function (err) {
-                alert("Error processing SQL: "+err.code);
-        })
-        /* */
+            })
 
-    }
+            /* When this function is called, PhoneGap has been initialized and is ready to roll */
+            /* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
+            see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
+            for more details -jm */
 
-        // get notifications.
+            function onDeviceReady() {
+                        // do your thing!
+                console.log('onDeviceReady')
+                        //if (navigator.notification) navigator.notification.alert("PhoneGap is working")
 
-        // cache the user's avatar images.
+                // First thing to do is to get the user's stored mobile login token, if there is one. otherwise we will ask them ot log in.
+                // var db = window.openDatabase("EvilEgo", "1.0", "EvilEgo Local Storage", 200000);
 
-        // pull the news feed.
+                if (window.localStorage) {
+                    var lastLogin = window.localStorage.getItem('lastLogin')
+                    if (lastLogin === 'undefined') lastLogin = null
+                    var lastLoginUser = null
 
-    </script>
+                    if (lastLogin) {
+                        EvilEgo.currentUser = lastLogin
+                        EvilEgo.loggedInUser = JSON.parse(window.localStorage.getItem(lastLogin))
+                        $('#loginForm input[name="login"]').val(lastLogin)
+                    }
+                }
 
-  </head>
-  <body style="-webkit-user-select: none; -webkit-touch-callout: none;">
-      <h1>Login to EvilEgo</h1>
-      <div id="loginForm">
-          <form action="#user/login" onsubmit="return false">
-              <div class="error"></div>
-              <input type="text" id="login" name="login" placeholder="Login Name" /> <br />
-              <input type="password" id="password" name="password" /> <br />
-              <button id="loginSubmit">Login</button>
-          </form>
-      </div>
-      <div id="content">
-      </div>
-  </body>
+
+                sameOrigin = location.origin
+                EvilEgo.dataHost = (window.device&&window.device.phonegap)?'http://mobile.evilego.com:4000':sameOrigin
+
+                Login = new LoginView ({model: new UserModel({login:EvilEgo.currentUser||''})})
+
+                //tx.executeSql("SELECT value FROM settings where name='lastLogin'", [], function(tx, results) {
+                    // this will be empty since no rows were inserted.
+                    /* This is here to know what to look for later when doing more DB manipulation 
+                    console.log("Login ID = " + results.insertId);
+                    // this will be 0 since it is a select statement
+                    console.log("Rows Affected = " + results.rowAffected);
+                    // the number of rows returned by the select statement
+                    console.log("Insert ID = " + results.rows.length);
+                    /* */
+                /*
+                        if (results.rows.length>=0) {
+                            tx.executeSql("SELECT * FROM user where login=%d", [results[0].value], function(tx, results) {
+                            }, function(err) {
+                            })
+                        }
+                }, function (err) {
+                        alert("Error processing SQL: "+err.code);
+                })
+                /* */
+
+            }
+        </script>
+
+    </head>
+    <body style="-webkit-user-select: none; -webkit-touch-callout: none;"> 
+        <div data-role="page">
+            <h1>Login to EvilEgo</h1>
+            <div id="content" data-role="content">
+              <div id="loginForm">
+                  <form action="#user/login" onsubmit="return false">
+                      <div class="error"></div>
+                      <input type="text" id="login" name="login" placeholder="Login Name" /> <br />
+                      <input type="password" id="password" name="password" /> <br />
+                      <button id="loginSubmit">Login</button>
+                  </form>
+              </div>
+            </div>
+            <div id="nav" data-role="footer" class="ui-bar"><h1>test</h1></div>
+        </div>
+    </body>
 
     <script type="text/javascript">
         // this sets up the Backbone model to use Mongo's _id
@@ -198,6 +188,7 @@
         }
     </script>
     <script src="js/jquery.tmpl.min.js"></script>
+    <script src="js/jquery.mobile-1.0.min.js"></script>
     <script src="model/user.js"></script>
     <script src="model/player.js"></script>
     <script src="model/post.js"></script>
