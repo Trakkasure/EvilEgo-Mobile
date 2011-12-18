@@ -4,7 +4,7 @@
         <title></title>
 	<meta name="viewport" content="width=device-width, initial-scale=1"> 
         <link rel="stylesheet" href="css/core.css" type="text/css" />
-        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" />
+        <link rel="stylesheet" href="css/jquery.mobile-1.0.min.css" />
 
         <!-- iPad/iPhone specific css below, add after your main css >
         <link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />		
@@ -74,7 +74,7 @@
                 sameOrigin = location.origin
                 EvilEgo.dataHost = (window.device&&window.device.phonegap)?'http://mobile.evilego.com:4000':sameOrigin
 
-                Login = new LoginView ({model: new UserModel({login:EvilEgo.currentUser||''})})
+                loaded.resolve()
 
                 //tx.executeSql("SELECT value FROM settings where name='lastLogin'", [], function(tx, results) {
                     // this will be empty since no rows were inserted.
@@ -101,19 +101,11 @@
 
     </head>
     <body style="-webkit-user-select: none; -webkit-touch-callout: none;"> 
-        <div data-role="page">
-            <h1>Login to EvilEgo</h1>
-            <div id="content" data-role="content">
-              <div id="loginForm">
-                  <form action="#user/login" onsubmit="return false">
-                      <div class="error"></div>
-                      <input type="text" id="login" name="login" placeholder="Login Name" /> <br />
-                      <input type="password" id="password" name="password" /> <br />
-                      <button id="loginSubmit">Login</button>
-                  </form>
-              </div>
-            </div>
-            <div id="nav" data-role="footer" class="ui-bar"><h1>test</h1></div>
+        <div data-role="page" id="login">
+        </div>
+        <div data-role="page" id="newsfeed">
+        </div>
+        <div data-role="page" id="newPost">
         </div>
     </body>
 
@@ -141,18 +133,14 @@
             if (!EvilEgo.currentUser) return
 
         }
-        function getTemplate(file,addId,cb) {
-            if ('function' === typeof addId) {
-                cb = addId
-                add = false
-            }
-            if (!cb && !addId) return
+        function getTemplate(file,addId) {
             console.log('getTemplate: %s',file)
+            var d = $.Deferred()
             if (EvilEgo.templates[file]) {
-                if (addId && $('#addId').length==0)
+                if (addId && $('#'+addId).length==0)
                   $('head').append('<script id="'+addId+'" type="text/x-jquery-tmpl">').append(EvilEgo.templates[file])
-                if (cb) cb(EvilEgo.templates[file])
-                return
+                d.resolveWith(EvilEgo.templates[file])
+                return d
             }
             if (!PhoneGap.available || file.charAt(0)=='/' || file.indexOf('http://')>=0) {
                 if (!addId) 
@@ -162,9 +150,11 @@
                     EvilEgo.templates[file] = data
                     $('head').append('<script id="'+addId+'" type="text/x-jquery-tmpl">')
                     $('script#'+addId).html(data)
-                }).error(function(err) {
+                    d.resolveWith(data)
+                }).fail(function(err) {
                     console.log('Error occured downloading template file "%s":%s',file)
                     console.log(err)
+                    d.rejectWith(err)
                 })
             } else {
                 var reader = new FileReader();
@@ -172,11 +162,11 @@
                     console.log('Loaded Template: '+file)
                     EvilEgo.templates[file]=evt.target.result
                     if (addId) $('head').append('<script id="'+addId+'" type="text/x-jquery-tmpl">').append(evt.target.result)
-                    if (cb)
-                        cb(evt.target.result)
+                    d.resolveWith(evt.target.result)
                 }
                 reader.readAsText(file);
             }
+            return d
         }
         function getFile(file,cb) {
             var reader = new FileReader();
@@ -197,6 +187,15 @@
     <script src="view/post.js"></script>
     <script type="text/javascript">
         //Backbone.history.start()
+        loaded = $.Deferred()
+        $.when(lfd,loaded).done(function(data) {
+            console.log('Load complete. Display login form')
+            console.log(arguments)
+            Login = new LoginView ({model: new UserModel({login:EvilEgo.currentUser||''})})
+        }).fail(function(data) {
+            console.log('Error load.')
+            console.log(data)
+        })
     </script>
 
 
