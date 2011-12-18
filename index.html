@@ -19,6 +19,7 @@
     -->
     <script src="js/underscore-min.js"></script>
     <script src="js/backbone-min.js"></script>
+    <script src="js/json2.js"></script>
         
     <script type="text/javascript">
 
@@ -44,7 +45,8 @@
     document.addEventListener("deviceready", onDeviceReady, false);
     $(function() {
         console.log('On body load')
-        if (!navigator.notification) {
+        if (!window.device||!window.device.phonegap) {
+            console.log('Running outside of mobile device')
             onDeviceReady()
         }
 	})
@@ -64,14 +66,21 @@
 
         if (window.localStorage) {
             var lastLogin = window.localStorage.getItem('lastLogin')
+            if (lastLogin === 'undefined') lastLogin = null
             var lastLoginUser = null
 
             if (lastLogin) {
                 EvilEgo.currentUser = lastLogin
-                EvilEgo.loggedInUser = window.localStorage.getItem(lastLogin)
+                EvilEgo.loggedInUser = JSON.parse(window.localStorage.getItem(lastLogin))
                 $('#loginForm input[name="login"]').val(lastLogin)
             }
         }
+
+
+        sameOrigin = location.origin
+        EvilEgo.dataHost = (window.device&&window.device.phonegap)?'http://mobile.evilego.com:4000':sameOrigin
+
+        Login = new LoginView ({model: new UserModel({login:EvilEgo.currentUser||''})})
 
         //tx.executeSql("SELECT value FROM settings where name='lastLogin'", [], function(tx, results) {
             // this will be empty since no rows were inserted.
@@ -131,14 +140,12 @@
                 return this
             }
         })
-        var EvilEgo = {
-                  currentUser : false
-                , dataHost    : 'http://mobile.evilego.com:4000'
-                //, dataHost    : 'http://192.168.6.24:4000'
-                , models      : {}
-                , collections : {}
-                , flags       : {}
-                , templates   : {}
+        EvilEgo = {
+            currentUser : false
+          , models      : {}
+          , collections : {}
+          , flags       : {}
+          , templates   : {}
         }
         function requestData(req,success, fail) {
             if (!EvilEgo.currentUser) return
@@ -163,7 +170,7 @@
                 $.get(file).done(function(data){
                     console.log('Loaded file: %s',file)
                     EvilEgo.templates[file] = data
-                    console.log($('head').append('<script id="'+addId+'" type="text/x-jquery-tmpl">'))
+                    $('head').append('<script id="'+addId+'" type="text/x-jquery-tmpl">')
                     $('script#'+addId).html(data)
                 }).error(function(err) {
                     console.log('Error occured downloading template file "%s":%s',file)
@@ -197,10 +204,8 @@
     <script src="view/user.js"></script>
     <script src="view/player.js"></script>
     <script src="view/post.js"></script>
-    <script src="routes-user.js"></script>
-    <script src="routes-post.js"></script>
     <script type="text/javascript">
-        Backbone.history.start()
+        //Backbone.history.start()
     </script>
 
 
