@@ -1,0 +1,24 @@
+a {
+  color: #ff7d00;
+}
+a:hover {
+  color: #ff9733;
+}
+img {
+  border: 0;
+}
+ul, li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.clear_left {
+  clear: left;
+}
+body {
+  padding: 0;
+  margin: 0;
+  background: #777777 url('http://www.evilego.com/images/core/bg.jpg') repeat;
+  background-attachment: fixed;
+  font-family: arial;
+}
