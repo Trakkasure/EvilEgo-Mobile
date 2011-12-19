@@ -1,3 +1,5 @@
+console.log('view/player.js')
+
 PlayerView = Backbone.View.extend({
     tagName: 'div'
 

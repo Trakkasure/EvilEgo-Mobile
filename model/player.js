@@ -1,3 +1,5 @@
+console.log('model/player.js')
+
 var PlayerModel = Backbone.Model.extend({
     initialize : function(defaults) {
         console.log("init model: player")

@@ -1,3 +1,5 @@
+console.log('model/user.js')
+
 UserModel = Backbone.Model.extend({
     defaults: {
         user: ''
@@ -11,7 +13,7 @@ UserModel = Backbone.Model.extend({
     }
   , authenticate: function(success,fail) {
         if ('' == this.get('login')) return fail('No login name')
-
+        console.log('Authenticating: '+this.get('login'))
         $.ajax({
             url: this.url()+'/authenticate'
           , type: "POST"
@@ -19,7 +21,9 @@ UserModel = Backbone.Model.extend({
           , success: function(data) {
               success(new PlayerModel(data))
             }
-          , error: function(res) {fail(res.responseText)}
+          , error: function(res) {
+              fail(res.responseText)
+          }
         })
     }
   , url: function() {

@@ -1,45 +1,59 @@
+console.log('view/user.js')
+
 UserView = Backbone.View.extend({
 
 })
 
-LoginView = new (Backbone.View.extend({
-    el: $('#loginForm')
+lfd = getTemplate('templates/loginForm.html','loginFormTemplate')
+
+LoginView = Backbone.View.extend({
+    el: $('#login')
 
   , events: {
         'click #loginSubmit': 'authenticate'
-      , 'change #login'     : 'setLogin'
+      , 'change #loginName' : 'setLogin'
       , 'change #password'  : 'setPassword'
     }
 
   , initialize: function() {
+        _.bindAll(this,'authenticate','setLogin','setPassword','render')
+        this.template = $('#loginFormTemplate').html()
         console.log('Init LoginView')
-        _.bindAll(this,'authenticate','setLogin','setPassword')
-        this.model.bind('change:login',function(v){$('#login').val(v.login)})
+        this.render()
+        this.model.bind('change:login',function(o,val){
+            console.log(o.get('login')+':'+val)
+            if (o.get('login')!=val)
+                $('#loginName').val(val)
+        })
+        window.location.hash = "login"
+    }
+  , render: function() {
+        $(this.el).html($.tmpl(this.template,this.model.toJSON())).trigger('create')
     }
   , authenticate: function() {
-        console.log('Authenticating')
         this.model.authenticate(function(o_player) {
-            console.log('Success')
-            EvilEgo.currentUser  = o_player.login
-            EvilEgo.loggedInUser = o_player
+            EvilEgo.currentUser  = o_player.get('login')
+            EvilEgo.loggedInUser = o_player.toJSON()
             if (window.localStorage) {
+                console.log('Setting local storage')
                 window.localStorage.setItem('lastLogin',EvilEgo.currentUser)
-                window.localStorage.setItem(EvilEgo.currentUser,EvilEgo.loggedInUser)
+                window.localStorage.setItem(EvilEgo.currentUser,JSON.stringify(EvilEgo.loggedInUser))
             }
             var pc = EvilEgo.collections.PostCollection = new PostCollection('newsfeed')
-            pc.fetchPosts(o_player.get('login'))
             var pv = new PostListView(pc)
+            pc.fetchPosts(o_player.get('login'))
+            window.location.hash = 'newsfeed'
             //pv.render()
         }, function(error) {
             $('.error', this.el).html(error||'An error occrued while communicating with the server')
         })
     }
   , setLogin: function(e)  {
-        //console.log('Setting login: %s',e.target.value))
+        console.log('Setting login: %s',e.currentTarget.value)
         this.model.set({'login':e.currentTarget.value})
     }
   , setPassword: function(e)  {
         this.model.set({'password':e.currentTarget.value})
     }
-}))({model: new UserModel({login:EvilEgo.currentUser})})
+})
 

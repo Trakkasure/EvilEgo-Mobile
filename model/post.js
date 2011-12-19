@@ -1,3 +1,4 @@
+console.log('model/post.js')
 PostModel = Backbone.Model.extend({
     defaults: {
         title: 'Default Title'
@@ -7,7 +8,7 @@ PostModel = Backbone.Model.extend({
     }
   , initialize: function(defaults) {
         //console.log("init model: post")
-        console.log(defaults)
+        //console.log(defaults)
         if (defaults && 'object' === typeof(defaults))
             this.set(defaults)
     }

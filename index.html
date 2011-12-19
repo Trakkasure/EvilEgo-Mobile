@@ -2,9 +2,7 @@
 <html>
     <head>
         <title></title>
-	<meta name="viewport" content="width=device-width, initial-scale=1"> 
-        <link rel="stylesheet" href="css/core.css" type="text/css" />
-        <link rel="stylesheet" href="css/jquery.mobile-1.0.min.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1"> 
 
         <!-- iPad/iPhone specific css below, add after your main css >
         <link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />		
@@ -13,6 +11,8 @@
         <!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
         <script type="text/javascript" charset="utf-8" src="phonegap-1.2.0.js"></script>
         <script src="js/jquery.min.js"></script>
+        <script src="js/jquery.mobile-1.0.min.js"></script>
+
         <script src="js/underscore-min.js"></script>
         <script src="js/backbone-min.js"></script>
         <script src="js/json2.js"></script>
@@ -39,9 +39,9 @@
             document.addEventListener("deviceready", onDeviceReady, false);
             $(function() {
                 console.log('On body load')
-                if (!window.device||!window.device.phonegap) {
+                if (!PhoneGap.available) {
                     console.log('Running outside of mobile device')
-                    onDeviceReady()
+               //     onDeviceReady()
                 }
             })
 
@@ -52,7 +52,6 @@
 
             function onDeviceReady() {
                         // do your thing!
-                console.log('onDeviceReady')
                         //if (navigator.notification) navigator.notification.alert("PhoneGap is working")
 
                 // First thing to do is to get the user's stored mobile login token, if there is one. otherwise we will ask them ot log in.
@@ -74,6 +73,8 @@
                 sameOrigin = location.origin
                 EvilEgo.dataHost = (window.device&&window.device.phonegap)?'http://mobile.evilego.com:4000':sameOrigin
 
+                _(logs).each(function(t){console.log(t)})
+                console.log('onDeviceReady')
                 loaded.resolve()
 
                 //tx.executeSql("SELECT value FROM settings where name='lastLogin'", [], function(tx, results) {
@@ -98,7 +99,7 @@
 
             }
         </script>
-
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" />
     </head>
     <body style="-webkit-user-select: none; -webkit-touch-callout: none;"> 
         <div data-role="page" id="login">
@@ -129,68 +130,56 @@
           , flags       : {}
           , templates   : {}
         }
-        function requestData(req,success, fail) {
-            if (!EvilEgo.currentUser) return
-
-        }
         function getTemplate(file,addId) {
-            console.log('getTemplate: %s',file)
+            console.log('getTemplate: '+file)
             var d = $.Deferred()
             if (EvilEgo.templates[file]) {
                 if (addId && $('#'+addId).length==0)
                   $('head').append('<script id="'+addId+'" type="text/x-jquery-tmpl">').append(EvilEgo.templates[file])
-                d.resolveWith(EvilEgo.templates[file])
-                return d
+                  d.resolveWith(EvilEgo.templates[file])
             }
-            if (!PhoneGap.available || file.charAt(0)=='/' || file.indexOf('http://')>=0) {
-                if (!addId) 
-                    addId='script-'+$('script').length
-                $.get(file).done(function(data){
-                    console.log('Loaded file: %s',file)
-                    EvilEgo.templates[file] = data
-                    $('head').append('<script id="'+addId+'" type="text/x-jquery-tmpl">')
-                    $('script#'+addId).html(data)
-                    d.resolveWith(data)
-                }).fail(function(err) {
-                    console.log('Error occured downloading template file "%s":%s',file)
-                    console.log(err)
-                    d.rejectWith(err)
-                })
-            } else {
-                var reader = new FileReader();
-                reader.onloadend = function(evt){
-                    console.log('Loaded Template: '+file)
-                    EvilEgo.templates[file]=evt.target.result
-                    if (addId) $('head').append('<script id="'+addId+'" type="text/x-jquery-tmpl">').append(evt.target.result)
-                    d.resolveWith(evt.target.result)
-                }
-                reader.readAsText(file);
-            }
+            if (!addId) 
+                addId='script-'+$('script').length
+            console.log('getting Template: '+file)
+            $.get(file,function(){},'text').done(function(data){
+                console.log('Loaded file: '+file)
+                EvilEgo.templates[file] = data
+                $('head').append('<script id="'+addId+'" type="text/x-jquery-tmpl">')
+                $('script#'+addId).html(data)
+                d.resolveWith(data)
+            }).fail(function(err) {
+                console.log('Error occured downloading template file "%s":%s',file)
+                console.log(err)
+                d.rejectWith(err||'An error occurred while loading template:' +file)
+            })
             return d
         }
-        function getFile(file,cb) {
-            var reader = new FileReader();
-            reader.onloadend = function(evt){
-                if (cb)
-                    cb(evt.target.result)
-            }
-            reader.readAsText(file);
+
+
+        logs = []
+        _oldlog = console.log
+       // if (!console.log) 
+        console.log = function(text) {
+            if (PhoneGap.available)
+                console.log.apply([text])
+            else logs.push(text)
         }
+
+/* */
     </script>
     <script src="js/jquery.tmpl.min.js"></script>
-    <script src="js/jquery.mobile-1.0.min.js"></script>
     <script src="model/user.js"></script>
-    <script src="model/player.js"></script>
-    <script src="model/post.js"></script>
     <script src="view/user.js"></script>
+    <script src="model/player.js"></script>
     <script src="view/player.js"></script>
+    <script src="model/post.js"></script>
     <script src="view/post.js"></script>
     <script type="text/javascript">
         //Backbone.history.start()
         loaded = $.Deferred()
+        $.when(loaded).then(function() {console.log('Resolved loading')})
         $.when(lfd,loaded).done(function(data) {
             console.log('Load complete. Display login form')
-            console.log(arguments)
             Login = new LoginView ({model: new UserModel({login:EvilEgo.currentUser||''})})
         }).fail(function(data) {
             console.log('Error load.')
