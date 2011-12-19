@@ -36,12 +36,13 @@
             }
             */
 
-            document.addEventListener("deviceready", onDeviceReady, false);
+            var _ready = $.Deferred()
+            document.addEventListener("deviceready", _ready.resolve, false);
             $(function() {
                 console.log('On body load')
                 if (!PhoneGap.available) {
                     console.log('Running outside of mobile device')
-               //     onDeviceReady()
+                    setTimeout('_ready.resolve()',1000) // delay the resolve so phonegap can call it first if it is loaded
                 }
             })
 
@@ -50,7 +51,7 @@
             see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
             for more details -jm */
 
-            function onDeviceReady() {
+            _ready.done(function () {
                         // do your thing!
                         //if (navigator.notification) navigator.notification.alert("PhoneGap is working")
 
@@ -65,16 +66,17 @@
                     if (lastLogin) {
                         EvilEgo.currentUser = lastLogin
                         EvilEgo.loggedInUser = JSON.parse(window.localStorage.getItem(lastLogin))
-                        $('#loginForm input[name="login"]').val(lastLogin)
+                    } else {
+                        EvilEgo.currentUser = ''
                     }
                 }
 
-
                 sameOrigin = location.origin
                 EvilEgo.dataHost = (window.device&&window.device.phonegap)?'http://mobile.evilego.com:4000':sameOrigin
+                
+                if (console.log == logCatcher) console.log=_oldlog
+                _(logs).each(function(t){console.log.apply(console,t)})
 
-                _(logs).each(function(t){console.log(t)})
-                console.log('onDeviceReady')
                 loaded.resolve()
 
                 //tx.executeSql("SELECT value FROM settings where name='lastLogin'", [], function(tx, results) {
@@ -97,9 +99,10 @@
                 })
                 /* */
 
-            }
+            })
         </script>
         <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" />
+        <link rel="stylesheet" href="css/core.css" />
     </head>
     <body style="-webkit-user-select: none; -webkit-touch-callout: none;"> 
         <div data-role="page" id="login">
@@ -156,16 +159,14 @@
         }
 
 
+// Handle iOS not being ready to log console messages.
         logs = []
-        _oldlog = console.log
-       // if (!console.log) 
-        console.log = function(text) {
-            if (PhoneGap.available)
-                console.log.apply([text])
-            else logs.push(text)
+        function logCatcher() {
+            logs.push(arguments)
         }
+        _oldlog = console.log
+        console.log=logCatcher
 
-/* */
     </script>
     <script src="js/jquery.tmpl.min.js"></script>
     <script src="model/user.js"></script>
@@ -177,7 +178,6 @@
     <script type="text/javascript">
         //Backbone.history.start()
         loaded = $.Deferred()
-        $.when(loaded).then(function() {console.log('Resolved loading')})
         $.when(lfd,loaded).done(function(data) {
             console.log('Load complete. Display login form')
             Login = new LoginView ({model: new UserModel({login:EvilEgo.currentUser||''})})
