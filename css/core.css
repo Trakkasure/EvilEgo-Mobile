@@ -8,7 +8,7 @@ img {
   border: 0;
 }
 ul, li {
-  margin: 0;
+  margin: 0 10px;
   padding: 0;
   list-style: none;
 }
@@ -22,3 +22,12 @@ body {
   background-attachment: fixed;
   font-family: arial;
 }
+
+#content {
+  background: #777777 url('http://www.evilego.com/images/core/bg.jpg') repeat;
+  font-family: arial;
+}
+
+.point-header { position: relative; float: right; }
+
+.post-delete-container { display: none; position: absolute; top:0px; left: 0px;}

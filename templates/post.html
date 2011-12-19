@@ -1,60 +1,64 @@
+<div data-role="collapsible" data-theme="a" data-content-theme="a" data-collapsed="false">
+    <h3>
+        <div class="ui-block-a">
+            <a href="#user/${owner}/profile">${owner}</a>
+        </div>
+        {{if canVote }}
+        <div class="ui-block-b point-header">
+            <span class="pointValue">${points}</span> points
+            <a href="#" id="add_point" class="vote_up">
+                <img src="http://evilego.com/images/core/icon_vote_up.png">
+            </a>
+            <!-- VOTE DOWN-->
+            <a href="#" id="remove_point" class="vote_down">
+                <img src="http://evilego.com/images/core/icon_vote_down.png">
+            </a>
+        </div>
+        {{/if}}
+    </h3>
     <!-- AVATAR -->
     <a href="/profile/${owner}/" class="post_avatar show_mini">
         <img src="${thumbnail}">
     </a>
-    <!-- POINTS RIBBON-->
-    <!-- only post with images or videos will be eleigible for points-->
-    <div class="points">
-        <h3 class="pointValue">${points}</h3>points
-        <!-- VOTE-->
-        <!-- VOTE UP-->
-        <a href="#" id="add_point" class="vote_up">
-            <img src="http://evilego.com/images/core/icon_vote_up.png">
-        </a>
-        <!-- VOTE DOWN-->
-        <a href="#" id="remove_point" class="vote_down">
-            <img src="http://evilego.com/images/core/icon_vote_down.png">
-        </a>
-    </div>
+    
     <!-- TITLE-->
-    <h3>
-        <a href="#user/${owner}/profile">${owner}</a> ${title}
-    </h3>
+    <strong>${title}</strong>
+    
     <!-- BODY -->
-    <div class="contents">
+    <span class="post-body">
         ${post}
+    </span>
+    {{if canDelete}}
+    <div class="post-delete-container">
+        <a href="#" data-role="button" data-icon="delete" id="removePost" class="post-delete" >Delete</a>
     </div>
+    {{/if}}
     <!-- IMAGES & VIDEO-->
     <div class="images">
         {{if images}}
-        {{each images}}
-        <div class="image">
-            <a href="http://evilego.com/uploads/${$value}" class="view_image">
-                <img src="http://evilego.com/uploads/th_${$value}">
-            </a>
-        </div>
-        {{/each}}
+            {{each images}}
+                <div class="image">
+                    <a href="http://evilego.com/uploads/${$value}" class="view_image">
+                        <img src="http://evilego.com/uploads/th_${$value}">
+                    </a>
+                </div>
+            {{/each}}
         {{/if}}
         {{if video}}
-        {{if video.video_url}}
-        <div class="video">
-            <a href="${video.video_url}" id="video_${_id}" class="video_player"></a>
-        </div>
-        {{/if}}
+            {{if video.video_url}}
+                <div class="video">
+                    <a href="${video.video_url}" id="video_${_id}" class="video_player"></a>
+                </div>
+            {{/if}}
         {{/if}}
     </div>
+    
     <!-- POST FOOTER-->
     <div class="date">
-        <!-- SOCIAL SHARING-->
-        <a href="http://www.twitter.com/share?url=http://evilego.com/post/${owner}/${_id}/" class="twitter-share-button">
-            <img src="http://evilego.com/images/profile/icon_twitter.png">
-        </a>
-        <a href="http://evilego.com/post/${owner}/${_id}/" title="${title}" class="facebook-share-button">
-            <img src="http://evilego.com/images/profile/icon_facebook.png" alt="Share">
-        </a>
         <!-- DATE-->
-    posted ${prettyDate} &nbsp;
-        <!-- REMOVE POST-->
+        posted ${prettyDate} &nbsp;
     </div>
+    
     <!-- COMMENTS ABOUT POST-->
-    <div class="comments_container">
+    <div class="comments_container"></div>
+</div>

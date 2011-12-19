@@ -1,25 +1,25 @@
 <div id="content" data-role="content">
-    <form action="/image_upload" method="post" enctype="multipart/form-data" id="post_form" class="wall_post">
-        <input type="hidden" name="owner" value="${owner}">
-        <!-- <input type="hidden" name="uid" value="${uid}"> -->
-        <!-- Title-->
-        <label for="title">Title</label>
+    <form action="#addPost" method="post" id="post_form" class="wall_post">
+        <input type="hidden" name="player" value="${owner}">
+
+        <label for="title" for="title">Title</label>
         <input type="text" name="title" class="title_input">
-        <!-- Post-->
+
         <textarea name="post" placeholder="Tell your story..."></textarea>
-        <!-- Add images-->
+
         <div id="uploaded_images">
         </div>
+
         <div class="media_icon">
             <img src="http://evilego.com/images/core/loading_sm_icon.gif" style="display: none" id="image_upload_loading">
             <a href="#" id="upload_image">
                 <img src="http://evilego.com/images/core/icon_camera.png">
             </a>
         </div>
-        <!-- Add Video-->
-        <div id="uploaded_images">
-        </div>
+
         <!--
+        <div id="uploaded_videos">
+        </div>
         <div class="media_icon">
             <a href="#" id="upload_video">
                 <img src="/images/core/icon_video.png">
