@@ -1,7 +1,7 @@
 a {
   color: #ff7d00;
 }
-a:hover {
+a {
   color: #ff9733;
 }
 img {
@@ -23,6 +23,7 @@ body {
   font-family: arial;
 }
 
+.ui-page,
 #content {
   background: #777777 url('http://www.evilego.com/images/core/bg.jpg') repeat;
   font-family: arial;
@@ -32,3 +33,151 @@ body {
 
 .post-delete-container { display: none; position: absolute; top:0px; left: 0px;}
 
+
+/* POSTS */
+
+ul#posts {
+    padding: 0 18px;
+    background-color: #4F4F4F;
+    background-color: rgba(70, 70, 70, 0.35);
+    color: white;
+    box-shadow: 0 0 8px #151515;
+    -moz-box-shadow: 0 0 8px #151515;
+    -webkit-box-shadow: 0 0 8px #151515;
+    margin: 0 9px;
+}
+
+ul#posts li,  ul#posts li {
+  position: relative;
+  margin: 0 -18px;
+  padding: 9px 18px;
+  line-height: 20px;
+  border-top: 1px solid #828282;
+  border-bottom: 1px solid #424242;
+  font-size: 13px;
+  color: #dddddd;
+}
+
+ul#posts li a {
+  text-decoration: none;
+}
+ul#posts li h3 {
+  font-size: 18px;
+  font-weight: normal;
+  color: #ffffff;
+  margin: 0 0 5px 0;
+  width: 90%;
+}
+ul#posts li .post_avatar,  ul#posts li .post_avatar {
+  float: left;
+  margin-left: -57px;
+}
+ul#posts li .post_avatar img,  ul#posts li .post_avatar img {
+  width: 48px;
+}
+ul#posts li .date,  ul#posts li .date {
+  padding-top: 10px;
+  color: #ffffff;
+  font-size: 11px;
+  clear: both;
+}
+ul#posts li .date a.remove_post,  ul#posts li .date a.remove_post {
+  color: #ddd;
+}
+ul#posts li .date a.remove_post,  ul#posts li .date a.remove_post {
+  color: #ff7d00;
+  text-decoration: underline;
+}
+ul#posts li .points,  ul#posts li .points {
+    position: absolute;
+    top: -1px;
+    right: 28px;
+    width: 70px;
+    height: 23px;
+    padding-top: 3px;
+    background: transparent url("http://www.evilego.com/images/profile/points_ribbon_bg_hov.png") no-repeat top left;
+    text-align: center;
+}
+ul#posts li .points h3,  ul#posts li .points h3 {
+  margin-bottom: -3px;
+}
+ul#posts li .points .vote_up,
+ ul#posts li .points .vote_up,
+ul#posts li .points .vote_down,
+ ul#posts li .points .vote_down {
+  position: absolute;
+  left: 63px;
+  height: 18px;
+  width: 25px;
+  border: 1px solid #616e4c;
+  background-color: #8da26d;
+  padding: 6px;
+  box-shadow: 0 3px 3px #333333;
+  -moz-box-shadow: 0 3px 3px #333333;
+  -webkit-box-shadow: 0 3px 3px #333333;
+  z-index: 1;
+}
+ul#posts li .points .vote_up,
+ ul#posts li .points .vote_up,
+ul#posts li .points .vote_down,
+ ul#posts li .points .vote_down {
+  background-color: #a1b484;
+}
+ul#posts li .points .vote_up,  ul#posts li .points .vote_up {
+  top: -5px;
+  -webkit-border-top-left-radius: 4px;
+  -webkit-border-top-right-radius: 4px;
+  -webkit-border-bottom-right-radius: 0;
+  -webkit-border-bottom-left-radius: 0;
+  -moz-border-radius-topleft: 4px;
+  -moz-border-radius-topright: 4px;
+  -moz-border-radius-bottomright: 0;
+  -moz-border-radius-bottomleft: 0;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+ul#posts li .points .vote_down, 
+ul#posts li .points .vote_down {
+  top: 26px;
+  -webkit-border-top-left-radius: 0;
+  -webkit-border-top-right-radius: 0;
+  -webkit-border-bottom-right-radius: 4px;
+  -webkit-border-bottom-left-radius: 4px;
+  -moz-border-radius-topleft: 0;
+  -moz-border-radius-topright: 0;
+  -moz-border-radius-bottomright: 4px;
+  -moz-border-radius-bottomleft: 4px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+ul#posts li .images{
+  background: #d67411 url("http://www.evilego.com/images/profile/bg_images.jpg") no-repeat;
+  padding-top: 37px;
+  overflow: hidden;
+  padding-bottom: 18px;
+  margin: 18px -9px 0;
+}
+ul#posts li .images div.image{
+  float: left;
+  margin-left: 12px;
+  margin-bottom: 12px;
+  height: 125px;
+  width: 141px;
+  overflow: hidden;
+}
+ul#posts li .images div.image img{
+  min-width: 141px;
+  min-height: 141px;
+}
+ul#posts li .images div.video{
+  float: left;
+  margin-left: 12px;
+  margin-bottom: 12px;
+  width: 598px;
+  height: 336px;
+  overflow: hidden;
+}

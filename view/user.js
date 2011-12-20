@@ -7,7 +7,7 @@ UserView = Backbone.View.extend({
 lfd = getTemplate('templates/loginForm.html','loginFormTemplate')
 
 LoginView = Backbone.View.extend({
-    el: $('#login')
+    el: $('#loginContainer')
 
   , events: {
         'click #loginSubmit': 'authenticate'

@@ -2,7 +2,11 @@
 <html>
     <head>
         <title></title>
+	<meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1"> 
+        
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" />
+        <link rel="stylesheet" href="css/core.css" />
 
         <!-- iPad/iPhone specific css below, add after your main css >
         <link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />		
@@ -101,15 +105,32 @@
 
             })
         </script>
-        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" />
-        <link rel="stylesheet" href="css/core.css" />
     </head>
     <body style="-webkit-user-select: none; -webkit-touch-callout: none;"> 
+        <!-- LOGIN PAGE -->
         <div data-role="page" id="login">
+            <div data-role="header" data-position="fixed"> 
+                <h1>EvilEgo</h1> 
+            </div> 
+            <div id="loginContainer"></div>
         </div>
-        <div data-role="page" id="newsfeed">
+        
+        <!-- NEWSFEED PAGE -->
+        <div data-role="page" id="newsfeed" data-theme="a">
+            <div data-role="header" data-position="fixed"> 
+                <h1 style="margin-top: 5px; margin-bottom: 0"><img src="http://www.evilego.com/images/core/logos/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
+            </div> 
+            <div id="newsfeedContainer"></div>
+            <div data-role="footer" class="ui-bar footer" data-position="fixed"> 
+                <a href="#newPost" data-role="button" data-icon="plus" id="newPost">Add Post</a>
+            </div> 
         </div>
-        <div data-role="page" id="newPost">
+        
+        <!-- NEW POST PAGE -->
+        <div data-role="page" id="newPost" data-theme="a">
+            <div data-role="header" data-position="fixed"> 
+                <h1 style="margin-top: 5px; margin-bottom: 0"><img src="http://www.evilego.com/images/core/logos/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
+            </div> 
         </div>
     </body>
 

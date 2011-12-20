@@ -1,57 +1,64 @@
-<div data-role="collapsible" data-theme="a" data-content-theme="a" data-collapsed="false">
-    <h3>
-        <div class="ui-block-a">
-            <a href="#user/${owner}/profile">${owner}</a>
-        </div>
-        {{if canVote }}
-        <div class="ui-block-b point-header">
+
+    {{if canVote }}
+        <div class="points">
             <span class="pointValue">${points}</span> points
+
+            <!-- VOTE-->
+            <!-- VOTE UP-->
             <a href="#" id="add_point" class="vote_up">
                 <img src="http://evilego.com/images/core/icon_vote_up.png">
             </a>
+
             <!-- VOTE DOWN-->
-            <a href="#" id="remove_point" class="vote_down">
+            <a href="#" id="add_point" class="vote_down">
                 <img src="http://evilego.com/images/core/icon_vote_down.png">
             </a>
         </div>
-        {{/if}}
-    </h3>
+    {{/if}}
+
     <!-- AVATAR -->
     <a href="/profile/${owner}/" class="post_avatar show_mini">
         <img src="${thumbnail}">
     </a>
     
     <!-- TITLE-->
-    <strong>${title}</strong>
+    <a href="#user/${owner}/profile">${owner}</a>
+    <h3>
+        ${title}
+    </h3>
     
     <!-- BODY -->
     <span class="post-body">
         ${post}
     </span>
+    
     {{if canDelete}}
-    <div class="post-delete-container">
-        <a href="#" data-role="button" data-icon="delete" id="removePost" class="post-delete" >Delete</a>
-    </div>
+        <div class="post-delete-container">
+            <a href="#" data-role="button" data-icon="delete" id="removePost" class="post-delete" >Delete</a>
+        </div>
     {{/if}}
+    
     <!-- IMAGES & VIDEO-->
-    <div class="images">
-        {{if images}}
-            {{each images}}
-                <div class="image">
-                    <a href="http://evilego.com/uploads/${$value}" class="view_image">
-                        <img src="http://evilego.com/uploads/th_${$value}">
-                    </a>
-                </div>
-            {{/each}}
-        {{/if}}
-        {{if video}}
-            {{if video.video_url}}
-                <div class="video">
-                    <a href="${video.video_url}" id="video_${_id}" class="video_player"></a>
-                </div>
+    {{if parseFloat(images.length) >= 1 || (video.video_url != null && video.video_url != '')}}
+        <div class="images">
+            {{if images}}
+                {{each images}}
+                    <div class="image">
+                        <a href="http://evilego.com/uploads/${$value}" class="view_image">
+                            <img src="http://evilego.com/uploads/th_${$value}">
+                        </a>
+                    </div>
+                {{/each}}
             {{/if}}
-        {{/if}}
-    </div>
+            {{if video}}
+                {{if video.video_url}}
+                    <div class="video">
+                        <a href="${video.video_url}" id="video_${_id}" class="video_player"></a>
+                    </div>
+                {{/if}}
+            {{/if}}
+        </div>
+    {{/if}}
     
     <!-- POST FOOTER-->
     <div class="date">
@@ -61,4 +68,3 @@
     
     <!-- COMMENTS ABOUT POST-->
     <div class="comments_container"></div>
-</div>

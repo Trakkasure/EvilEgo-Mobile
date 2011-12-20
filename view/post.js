@@ -76,7 +76,7 @@ getTemplate('templates/post.html','postTemplate')
 
 // This is the container for the list of posts
 PostListView = Backbone.View.extend({
-    el: $('#newsfeed')
+    el: $('#newsfeedContainer')
   , events: {
         'click #newPost': 'newPost'
     }
