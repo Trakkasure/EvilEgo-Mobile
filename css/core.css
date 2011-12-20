@@ -27,3 +27,8 @@ body {
   background: #777777 url('http://www.evilego.com/images/core/bg.jpg') repeat;
   font-family: arial;
 }
+
+.point-header { position: relative; float: right; }
+
+.post-delete-container { display: none; position: absolute; top:0px; left: 0px;}
+

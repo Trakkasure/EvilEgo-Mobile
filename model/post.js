@@ -1,4 +1,3 @@
-console.log('model/post.js')
 PostModel = Backbone.Model.extend({
     defaults: {
         title: 'Default Title'
@@ -7,25 +6,36 @@ PostModel = Backbone.Model.extend({
       , isEmpty: true
     }
   , initialize: function(defaults) {
-        //console.log("init model: post")
-        //console.log(defaults)
         if (defaults && 'object' === typeof(defaults))
             this.set(defaults)
-    }
+        var video = this.get('video')
+        var images = this.get('images')
+        // Used in the template to show/hide the point voting section
+        this.set({canVote: ((images && images.length) || (video && video.video_url))})
+        // Used in the template to output a delete node to show when post swiped
+        this.set({canDelete: (this.get('owner') == EvilEgo.currentUser)})
+        _.bindAll(this,'addPoint','removePoint','remove','url')
+    } 
   , addPoint: function() {
-        $.get('/post/'+this.get('_id')+'/vote/1').done(function(data){
+        var self = this
+        $.get(this.url()+'/vote/1').done(function(data){
             var points = data.points
-            this.set({points:points})
+            self.set({points:data.points})
         })
     }
   , removePoint: function() {
-        $.get('/post/'+this.get('_id')+'/vote/-1').done(function(data){
+        var self = this
+        $.get(this.url()+'/vote/-1').done(function(data){
             var points = data.points
-            this.set({points:points})
+            self.set({points:data.points})
         })
     }
+  , remove: function() {
+      if (this.get('canDelete'))
+          this.destroy()
+    }
   , url: function() {
-      return '/post/'+this.get('owner')+'/'+this.get('_id')
+      return EvilEgo.dataHost+'/post/'+this.get('_id')
     }
 })
 
@@ -34,12 +44,19 @@ PostCollection = Backbone.Collection.extend({
   , model: PostModel
 
   , initialize: function() {
+        var now = (new Date()).getTime()
+          , self = this
+        this.comparator = function(item) {
+            var x = parseInt(item.get('timestamp'))
+            return (now - x)
+        }
+        _.bindAll(this,'setType','fetchPosts')
     }
   , setType: function(type) {
         this.type = type
     }
   , fetchPosts: function(player) {
-        console.log('Fetching posts for '+player)
+        //console.log('Fetching posts for '+player)
         var self = this
         switch(this.type) {
             case 'newsfeed':
@@ -68,9 +85,10 @@ PostFormModel = Backbone.Model.extend({
     defaults: {
         owner:'Nobody'
       , missions: []
+      , images: []
     }
   , url: function() {
-        return EvilEgo.dataHost+'/post/'+this.get('owner')+'/new'
+        return EvilEgo.dataHost+'/post/'+this.get('owner')
     }
   , initialize: function(defaults) {
         this.set(defaults)
