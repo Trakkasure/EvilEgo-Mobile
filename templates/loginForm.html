@@ -1,12 +1,11 @@
 <div id="content" data-role="content">
-
-    <img src="http://www.evilego.com/images/core/logos/logo_horizontal_sm.png" alt="EvilEgo.com" style="display: block; margin: 30px auto">
-    <div>
-        <form action="#user/login" method="post" onsubmit="return false">
-            <div class="error"></div>
-            <input type="text" id="loginName" name="login" value="${login}" placeholder="Login Name" /> <br />
-            <input type="password" id="password" name="password" /> <br />
-            <button id="loginSubmit">Login</button>
-        </form>
-    </div>
+    <form action="#user/login" method="post" onsubmit="return false">
+        <div class="error"></div>
+        <input type="text" id="loginName" name="login" value="${login}" placeholder="Login Name" /> <br />
+        <input type="password" id="password" name="password" placeholder="Password" /> <br />
+        <span style="text-align: center'">
+            <input type="checkbox" id="save" name="save" data-role="none" /><label for="save">Remember me</label> <br />
+        </span>
+        <button id="loginSubmit">Login</button>
+    </form>
 </div>

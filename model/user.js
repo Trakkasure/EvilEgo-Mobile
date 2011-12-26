@@ -4,6 +4,7 @@ UserModel = Backbone.Model.extend({
     defaults: {
         user: ''
       , password: ''
+      , save: false
     }
   , initialize: function(defaults) {
         console.log("init model: user")

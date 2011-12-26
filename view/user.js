@@ -13,10 +13,11 @@ LoginView = Backbone.View.extend({
         'click #loginSubmit': 'authenticate'
       , 'change #loginName' : 'setLogin'
       , 'change #password'  : 'setPassword'
+      , 'change #save    '  : 'setSave'
     }
 
   , initialize: function() {
-        _.bindAll(this,'authenticate','setLogin','setPassword','render')
+        _.bindAll(this,'authenticate','setLogin','setPassword','setSave','render')
         this.template = $('#loginFormTemplate').html()
         console.log('Init LoginView')
         this.render()
@@ -31,12 +32,13 @@ LoginView = Backbone.View.extend({
         $(this.el).html($.tmpl(this.template,this.model.toJSON())).trigger('create')
     }
   , authenticate: function() {
+        var self = this
         this.model.authenticate(function(o_player) {
             EvilEgo.currentUser  = o_player.get('login')
             EvilEgo.loggedInUser = o_player.toJSON()
-            if (window.localStorage) {
+            if (self.model.get('save') && window.localStorage) {
                 console.log('Setting local storage')
-                window.localStorage.setItem('lastLogin',EvilEgo.currentUser)
+                window.localStorage.setItem('lastLogin',JSON.stringify({login:EvilEgo.currentUser,password:self.model.get('password')}))
                 window.localStorage.setItem(EvilEgo.currentUser,JSON.stringify(EvilEgo.loggedInUser))
             }
             var pc = EvilEgo.collections.PostCollection = new PostCollection('newsfeed')
@@ -54,6 +56,9 @@ LoginView = Backbone.View.extend({
     }
   , setPassword: function(e)  {
         this.model.set({'password':e.currentTarget.value})
+    }
+  , setSave: function(e)  {
+        this.model.set({'save':e.currentTarget.checked})
     }
 })
 

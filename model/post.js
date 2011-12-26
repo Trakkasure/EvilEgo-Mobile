@@ -9,12 +9,16 @@ PostModel = Backbone.Model.extend({
         if (defaults && 'object' === typeof(defaults))
             this.set(defaults)
         var video = this.get('video')
-        var images = this.get('images')
+          , images = this.get('images')
         // Used in the template to show/hide the point voting section
-        this.set({canVote: ((images && images.length) || (video && video.video_url))})
-        // Used in the template to output a delete node to show when post swiped
-        this.set({canDelete: (this.get('owner') == EvilEgo.currentUser)})
-        _.bindAll(this,'addPoint','removePoint','remove','url')
+        this.set({
+            canVote  : ((images && images.length) || (video && video.video_url))?1:0 // Used in the template to output a delete node to show when post swiped
+          , hasVideo : (video && video.video_url)?1:0  // Used in the template to output a delete node to show when post swiped
+          , hasImage : (images && images.length)?1:0 // Used in the template to output a delete node to show when post swiped
+          , canDelete: (this.get('owner') == EvilEgo.currentUser)
+          , newComments : 0
+        })
+        _.bindAll(this,'addPoint','removePoint','remove','url','getComments')
     } 
   , addPoint: function() {
         var self = this
@@ -31,8 +35,13 @@ PostModel = Backbone.Model.extend({
         })
     }
   , remove: function() {
-      if (this.get('canDelete'))
-          this.destroy()
+        if (this.get('canDelete'))
+            this.destroy()
+    }
+  , getComments: function() {
+        var cm = new CommentCollection({post_id: this.get('_id')})
+        var cv = new CommentListView(cm)
+        cm.fetch().done(cm.render).error(function(){window.location.hash='newsfeed'})
     }
   , url: function() {
       return EvilEgo.dataHost+'/post/'+this.get('_id')
@@ -68,18 +77,6 @@ PostCollection = Backbone.Collection.extend({
         return this
     }
 })
-
-CommentModel = Backbone.Model.extend({
-    defaults: {
-        owner: 'Nobody'
-      , comment: 'Empty Comment'
-    }
-})
-
-CommentCollection = Backbone.Collection.extend({
-    model: CommentModel
-})
-
 
 PostFormModel = Backbone.Model.extend({
     defaults: {

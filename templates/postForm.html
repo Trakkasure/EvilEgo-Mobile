@@ -3,35 +3,14 @@
         <input type="hidden" name="player" value="${owner}">
 
         <label for="title" for="title">Title</label>
-        <input type="text" name="title" class="title_input">
+        <input type="text" name="title" class="title_input" placeholder="What is this about?" />
 
         <textarea name="post" placeholder="Tell your story..."></textarea>
 
-        <div id="uploaded_images">
-        </div>
-
-        <div class="media_icon">
-            <img src="http://evilego.com/images/core/loading_sm_icon.gif" style="display: none" id="image_upload_loading">
-            <a href="#" id="upload_image">
-                <img src="http://evilego.com/images/core/icon_camera.png">
-            </a>
-        </div>
-
-        <!--
-        <div id="uploaded_videos">
-        </div>
-        <div class="media_icon">
-            <a href="#" id="upload_video">
-                <img src="/images/core/icon_video.png">
-        </a>
-        </div>
-        -->
-        <!-- Challenge-->
+        <a href="#" data-role="button" data-icon="plus" data-inline="true" id="add-image-button">Add Image</a>
+        <a href="#" data-role="button" data-icon="check" data-inline="true" data-theme="b" id="save-post">Save Post</a>
         {{if missions.length>0}}
-        <div style="float: left">
-            <a href="#" id="choose_mission">
-                <img src="http://evilego.com/images/core/icon_mission.png">
-        </a>
+        <!-- Challenge-->
         <select name="challenge_id" style="display: none" id="challenge">
             <option value=""> - Choose Mission -</option>
             {{if missions.length}}
@@ -42,14 +21,9 @@
         </select>
         </div>
         {{/if}}
+
+        <div id="uploaded_images"> </div>
+
         <br style="clear: both">
-        <!-- Video Stuff
-        <input type="hidden" name="video_url" value="" id="video_url">
-        <input type="hidden" name="video_th_url" value="" id="video_th_url">
-        -->
-        <!-- Submit-->
-        <a href="#" id="post_submit" class="btn">
-            <img src="http://evilego.com/images/profile/btn_add_post.png">
-        </a>
     </form>
 </div>

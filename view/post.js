@@ -1,73 +1,128 @@
-console.log('view/post.js')
-
 PostView = Backbone.View.extend({
     tagName: 'li'
+  , disableMouseEvents: false
   , deleteOn: false
-  , originX: 0
-  , originY: 0
+  , menuOn: false
   , events: {
-        'click #add_point'   : 'addPoint'
-      , 'click #remove_point': 'removePoint'
-      , 'click .post-delete' : 'remove'
-      , 'swiperight'         : 'touchmove'
-      , 'click'              : 'clickedContent'
+        'tap .vote_up'     : 'addPoint'
+      , 'tap .vote_down'   : 'removePoint'
+      , 'tap .post-delete' : 'remove'
+      , 'swiperight'         : 'swiperight'
+      , 'swipeleft'          : 'swipeleft'
+      , 'tap'              : 'clickedContent'
+      , 'tap .post-reply'  : 'reply'
+      , 'tap .post-view-comments': 'showComments'
     }
   , initialize: function() {
-      _.bindAll(this,'render','remove','addPoint','removePoint','pointsChange','touchmove', 'clickedContent')
+      _.bindAll(this,'render','remove','addPoint','removePoint','pointsChange','swiperight', 'clickedContent','reply','showComments','showMenu')
       this.model.bind('change:points',this.pointsChange)
-      this.template = $('#postTemplate').html()
+      this.template = '#postTemplate'
     }
   , clickedContent: function(e) {
         e.stopPropagation()
         e.preventDefault()
-        console.log('Clicked content')
+        if(this.disableMouseEvents) return
+        console.log('Tap content')
         //if (e.currentTarget != $('.post-delete',this.el))
         if (this.deleteOn) {
             $('.post-delete-container',this.el).hide()
             this.deleteOn = false
+        } else if (this.menuOn) {
+            $('.post-menu-container',this.el).hide()
+            this.menuOn = false
+        } else {
+            this.showMenu()
         }
+        return this
     }
-  , touchmove: function(e) {
+  , showMenu: function() {
+        if ('notification' === this.model.get('type')) return
+        this.menuOn = true
+        var dc = $('.post-menu-container',this.el)
+        var el = $(this.el)
+        dc.css('top',(parseInt(el.css('height'))/2)-10) // -10 accounts for margin
+        dc.css('left',(parseInt(el.css('width'))/2)-(parseInt(dc.css('width'))/2)+15)
+        dc.show()
+        return this
+    }
+  , showComments: function() {
+        console.log('Show comments')
+        this.model.getComments()
+        $('.post-menu-container',this.el).hide()
+        this.menuOn = false
+        window.location.hash = 'comments'
+        return this
+    }
+  , reply: function() {
+        new CommentFormView({model: new CommentFormModel({post_id: this.model.get('_id')})})
+        window.location.hash = 'new-comment'
+        return this
+    }
+  , swipeleft: function(e) {
         e.stopPropagation()
-        if (this.model.get('canDelete')) {
+        e.preventDefault()
+        this.disableMouseEvents = true
+        var self = this
+        setTimeout(function() {
+            self.disableMouseEvents = false
+        },500)
+        if (this.model.get('comments')==0) this.showMenu()
+        else this.showComments()
+        return this
+    }
+  , swiperight: function(e) {
+        e.stopPropagation()
+        e.preventDefault()
+        $('.post-menu-container',this.el).hide()
+        if (!this.deleteOn && this.model.get('canDelete')) {
+            var self = this
+            this.disableMouseEvents = true
+            setTimeout(function() {
+                self.disableMouseEvents = false
+            },500)
             this.deleteOn = true
             var dc = $('.post-delete-container',this.el)
             var el = $(this.el)
-            dc.css('top',el.position().top+(parseInt(el.css('height'))/2)-10)
+            dc.css('top',(parseInt(el.css('height'))/2)-10) // -10 accounts for margin
             dc.css('left',(parseInt(el.css('width'))/2)-30)
             dc.show()
         }
+        return this
         
     }
   , remove: function(e) {
-        e.stopPropagation()
-        e.preventDefault()
-        if (this.deleteOn) {
+        if (e) {
+            e.stopPropagation()
+            e.preventDefault()
+        }
+       // if (this.deleteOn) {
             console.log('deleting')
             //$('.post-delete-container',this.el).hide()
             //this.deleteOn = false
             this.model.remove()
-        }
+        //}
+        return this
     }
   , pointsChange: function() {
-      $('.pointValue','li#'+this.model.get('_id')).html(this.model.get('points'))
+        $('.pointValue','li#'+this.model.get('_id')).html(this.model.get('points'))
+        return this
     }
   , render: function() {
-      //console.log('Rendering post ' + this.get('title'))
-      //$(this.el).html(this.model.get('title'))
-      $(this.el).html($.tmpl(this.template,this.model.toJSON()))
-      $(this.el).attr('id',this.model.get('_id'))
-      return this
+        $(this.el).html($.tmpl($(this.template).html(),this.model.toJSON()))
+        $(this.el).attr('id',this.model.get('_id'))
+        return this
     }
   , addPoint: function(e) {
-      e.stopImmediatePropagation()
-      console.log('Adding point')
-      this.model.addPoint()
+        e.stopPropagation()
+        e.preventDefault()
+        this.model.addPoint()
+        return this
     }
   , removePoint: function(e) {
-      e.stopImmediatePropagation()
-      console.log('Removing point')
-      this.model.removePoint()
+        e.stopPropagation()
+        e.preventDefault()
+        this.model.removePoint()
+        return this
     }
 
 })
@@ -76,14 +131,15 @@ getTemplate('templates/post.html','postTemplate')
 
 // This is the container for the list of posts
 PostListView = Backbone.View.extend({
-    el: $('#newsfeedContainer')
+    el: $('#newsfeed')
   , events: {
-        'click #newPost': 'newPost'
+        'tap #new-post-button': 'newPost'
+      , 'tap #refresh-post-button': 'fetch'
     }
   , initialize: function(collection){
         _.bindAll(this, 'render', 'newPost', 'appendPost','removePost') // remember: every function that uses 'this' as the current object should be in here
-        this.template = $('#postListTemplate').html()
-        EvilEgo.currentPostList = this
+        this.template = '#postListTemplate'
+        if (!collection) collection = EvilEgo.collections.PostCollection
         if (collection) {
             this.collection = collection
             this.collection.bind('add', this.render) // collection event binder
@@ -98,9 +154,6 @@ PostListView = Backbone.View.extend({
             console.log('Post not in collection. Adding...')
             this.collection.add(post) // we weren't called by an event
         } else {
-            // Add to the view
-            //var idx = collection.models.indexOf(post)
-            //if (idx == models.length-1)
             if (post.collection && (post.collection != this.collection)) post.collection.remove(post)
             post.collection = this.collection
             $('ul', this.el).append((new PostView({model:post})).render().el)
@@ -118,32 +171,34 @@ PostListView = Backbone.View.extend({
     }
   , newPost: function() {
         new PostFormView({model: new PostFormModel({owner: EvilEgo.currentUser})})
-        window.location.hash = 'newPost'
+        window.location.hash = 'new-post'
     }
   , render: function() {
-        $(this.el).html($.tmpl(this.template,{}))
+        $('#newsfeed-container',this.el).html($.tmpl($(this.template).html(),{}))
         _(this.collection.models).each(function(post){ // iterate the post models
             this.appendPost(post,this.collection) // append the models
         },this)
         $(this.el).trigger('create')
         return this
     }
+  , fetch: function() {
+        this.collection.fetch()
+    }
 })
 
 getTemplate('templates/postForm.html','postFormTemplate')
 PostFormView = Backbone.View.extend({
-    el: $('#newPost')
-  , deferred: []
+    el: $('#new-post')
   , events: {
-        'click #post_submit'            : 'submitPost'
+        'tap #save-post'            : 'submitPost'
       , 'change input[name="title"]'    : 'updateTitle'
       , 'change textarea[name="post"]'  : 'updatePostText'
-      , 'click #upload_image'           : 'selectImage'
-      , 'click #choose_mission'         : 'enableMissions'
+      , 'tap #upload_image'           : 'selectImage'
+      , 'tap #choose_mission'         : 'enableMissions'
     }
   , initialize: function() {
         console.log('New post form view')
-        this.template = $('#postFormTemplate').html()
+        this.template = '#postFormTemplate'
         _.bindAll(this, 'render', 'submitPost', 'updateTitle', 'updatePostText', 'selectImage', 'enableMissions' ) // remember: every function that uses 'this' as the current object should be in here
         //this.model.bind('change',this.render)
         var self = this
@@ -153,7 +208,9 @@ PostFormView = Backbone.View.extend({
   , render: function() {
         console.log('Rendering form')
         try {
-            $(this.el).html($.tmpl(this.template,this.model.toJSON())).trigger('create')
+            //console.log(this.template)
+            console.log($('#new-post-container',this.el).html())
+            $('#new-post-container',this.el).html($.tmpl($(this.template).html(),this.model.toJSON())).trigger('create')
         } catch (e) {
             console.log(e.description)
         }
@@ -162,7 +219,7 @@ PostFormView = Backbone.View.extend({
   , submitPost: function() {
         this.model.save().done(function(data) {
             console.log('Post saved')
-            EvilEgo.currentPostList.appendPost(data)
+            EvilEgo.collections.PostCollection.add(data)
             window.location.hash = 'newsfeed'
         })
     }

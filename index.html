@@ -55,6 +55,7 @@
             see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
             for more details -jm */
 
+            var lastLogin = {}
             _ready.done(function () {
                         // do your thing!
                         //if (navigator.notification) navigator.notification.alert("PhoneGap is working")
@@ -63,16 +64,18 @@
                 // var db = window.openDatabase("EvilEgo", "1.0", "EvilEgo Local Storage", 200000);
 
                 if (window.localStorage) {
-                    var lastLogin = window.localStorage.getItem('lastLogin')
-                    if (lastLogin === 'undefined') lastLogin = null
-                    var lastLoginUser = null
-
-                    if (lastLogin) {
-                        EvilEgo.currentUser = lastLogin
-                        EvilEgo.loggedInUser = JSON.parse(window.localStorage.getItem(lastLogin))
-                    } else {
-                        EvilEgo.currentUser = ''
-                    }
+                    var x = window.localStorage.getItem('lastLogin')
+                    if (x) {
+                        try {
+                        lastLogin = JSON.parse(x)
+                        } catch (e) {
+                            console.log(e)
+                            lastLogin = {login:window.localStorage.getItem('lastLogin'),password:''}
+                        }
+                    } else lastLogin = {login:'',password:''}
+                    EvilEgo.currentUser = lastLogin.login
+                    if (lastLogin.login != '')
+                    EvilEgo.loggedInUser = JSON.parse(window.localStorage.getItem(lastLogin))
                 }
 
                 sameOrigin = location.origin
@@ -108,9 +111,11 @@
     </head>
     <body style="-webkit-user-select: none; -webkit-touch-callout: none;"> 
         <!-- LOGIN PAGE -->
-        <div data-role="page" id="login">
+        <div data-role="page" id="login" data-theme="a">
             <div data-role="header" data-position="fixed"> 
-                <h1>EvilEgo</h1> 
+                <h1 style="margin-top: 5px; margin-bottom: 0">
+                    <img src="images/logo_horizontal_sm.png" alt="EvilEgo.com" />
+                </h1> 
             </div> 
             <div id="loginContainer"></div>
         </div>
@@ -118,18 +123,44 @@
         <!-- NEWSFEED PAGE -->
         <div data-role="page" id="newsfeed" data-theme="a">
             <div data-role="header" data-position="fixed"> 
-                <h1 style="margin-top: 5px; margin-bottom: 0"><img src="http://www.evilego.com/images/core/logos/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
+                <h1 style="margin-top: 5px; margin-bottom: 0"><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
             </div> 
-            <div id="newsfeedContainer"></div>
+            <div id="newsfeed-container" data-role='content'></div>
             <div data-role="footer" class="ui-bar footer" data-position="fixed"> 
-                <a href="#newPost" data-role="button" data-icon="plus" id="newPost">Add Post</a>
+                <a href="#newsfeed" data-role="button" data-icon="refresh" data-inline="true" id="refresh-post-button">Refresh</a>
+                <a href="#new-post" data-role="button" data-icon="plus" data-inline="true" id="new-post-button">Add Post</a>
             </div> 
         </div>
         
-        <!-- NEW POST PAGE -->
-        <div data-role="page" id="newPost" data-theme="a">
+        <!-- COMMENTS PAGE -->
+        <div data-role="page" id="comments" data-theme="a">
             <div data-role="header" data-position="fixed"> 
-                <h1 style="margin-top: 5px; margin-bottom: 0"><img src="http://www.evilego.com/images/core/logos/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
+                <h1 style="margin-top: 5px; margin-bottom: 0"><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
+            </div> 
+            <div id="comments-container" data-role='content'></div>
+            <div data-role="footer" class="ui-bar footer" data-position="fixed"> 
+                <a href="#newsfeed" data-role="button" data-icon="arrow-l">Back</a>
+                <a href="#new-comment" data-role="button" data-icon="plus" data-inline="true" id="new-comment-button">Add Comment</a>
+            </div> 
+        </div>
+        <!-- NEW POST PAGE -->
+        <div data-role="page" id="new-post" data-theme="a">
+            <div data-role="header" data-position="fixed"> 
+                <h1 style="margin-top: 5px; margin-bottom: 0"><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
+            </div> 
+            <div id="new-post-container" data-role='content'></div>
+            <div data-role="footer" class="ui-bar footer" data-position="fixed"> 
+                <a href="#newsfeed" data-role="button" data-icon="arrow-l">Back</a>
+            </div> 
+        </div>
+        <!-- NEW COMMENT PAGE -->
+        <div data-role="page" id="new-comment" data-theme="a">
+            <div data-role="header" data-position="fixed"> 
+                <h1 style="margin-top: 5px; margin-bottom: 0"><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
+            </div> 
+            <div id="new-comment-container" data-role='content'></div>
+            <div data-role="footer" class="ui-bar footer" data-position="fixed"> 
+                <a href="#comments" data-role="button" data-icon="arrow-l" id='cancel-comment'>Back</a>
             </div> 
         </div>
     </body>
@@ -196,12 +227,15 @@
     <script src="view/player.js"></script>
     <script src="model/post.js"></script>
     <script src="view/post.js"></script>
+    <script src="model/comments.js"></script>
+    <script src="view/comments.js"></script>
+    <script src="js/jquery.infinitescroll.min.js"></script>
     <script type="text/javascript">
         //Backbone.history.start()
         loaded = $.Deferred()
         $.when(lfd,loaded).done(function(data) {
             console.log('Load complete. Display login form')
-            Login = new LoginView ({model: new UserModel({login:EvilEgo.currentUser||''})})
+            Login = new LoginView ({model: new UserModel({login:EvilEgo.currentUser||'',password:lastLogin.password})})
         }).fail(function(data) {
             console.log('Error load.')
             console.log(data)

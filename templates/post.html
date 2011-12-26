@@ -1,47 +1,63 @@
-
+{{if newComments > 0}}
+    <div class="new-comment-count ${type}">${newComments}</div>
+{{/if}}
     {{if canVote }}
         <div class="points">
             <span class="pointValue">${points}</span> points
 
             <!-- VOTE-->
             <!-- VOTE UP-->
-            <a href="#" id="add_point" class="vote_up">
+            <a href="#" class="vote_up">
                 <img src="http://evilego.com/images/core/icon_vote_up.png">
             </a>
 
             <!-- VOTE DOWN-->
-            <a href="#" id="add_point" class="vote_down">
+            <a href="#" class="vote_down">
                 <img src="http://evilego.com/images/core/icon_vote_down.png">
             </a>
         </div>
     {{/if}}
 
     <!-- AVATAR -->
-    <a href="/profile/${owner}/" class="post_avatar show_mini">
-        <img src="${thumbnail}">
+    <a href="#profile/${owner}" class="post_avatar show_mini">
+        <img src="http://evilego.com/avatars/${owner}_icon.png">
     </a>
     
     <!-- TITLE-->
-    <a href="#user/${owner}/profile">${owner}</a>
+    <a href="#porfile/${owner}">${owner}</a>
     <h3>
         ${title}
     </h3>
     
     <!-- BODY -->
-    <span class="post-body">
-        ${post}
-    </span>
+    <div class="post-body">
+        {{html post}}
+    </div>
     
     {{if canDelete}}
         <div class="post-delete-container">
-            <a href="#" data-role="button" data-icon="delete" id="removePost" class="post-delete" >Delete</a>
+            <a href="#" data-role="button" data-icon="delete" class="post-delete" >Delete</a>
         </div>
     {{/if}}
+
+    <div class="post-menu-container">
+        <a href="#newComment" data-role="button" data-icon="back" data-inline="true" class="post-reply" >Reply</a>
+        {{if comments > 0}}
+        <a href="#comments" data-role="button" data-icon="arrow-r" data-inline="true" class="post-view-comments" >Comments</a>
+        {{/if}}
+    </div>
     
+    <!-- POST FOOTER-->
+    <div class="comment-count ${type}">${comments} comments</div>
+    <div class="date">
+        <!-- DATE-->
+        posted ${prettyDate} &nbsp;
+    </div>
+    <br style="clear:both" />
     <!-- IMAGES & VIDEO-->
-    {{if parseFloat(images.length) >= 1 || (video.video_url != null && video.video_url != '')}}
+    {{if hasImage || hasVideo}}
         <div class="images">
-            {{if images}}
+            {{if hasImage}}
                 {{each images}}
                     <div class="image">
                         <a href="http://evilego.com/uploads/${$value}" class="view_image">
@@ -50,7 +66,7 @@
                     </div>
                 {{/each}}
             {{/if}}
-            {{if video}}
+            {{if hasVideo}}
                 {{if video.video_url}}
                     <div class="video">
                         <a href="${video.video_url}" id="video_${_id}" class="video_player"></a>
@@ -60,11 +76,3 @@
         </div>
     {{/if}}
     
-    <!-- POST FOOTER-->
-    <div class="date">
-        <!-- DATE-->
-        posted ${prettyDate} &nbsp;
-    </div>
-    
-    <!-- COMMENTS ABOUT POST-->
-    <div class="comments_container"></div>
