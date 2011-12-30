@@ -33,6 +33,7 @@ LoginView = Backbone.View.extend({
     }
   , authenticate: function() {
         var self = this
+        $('#loginSubmit',self.el).hide()
         this.model.authenticate(function(o_player) {
             EvilEgo.currentUser  = o_player.get('login')
             EvilEgo.loggedInUser = o_player.toJSON()
@@ -48,6 +49,7 @@ LoginView = Backbone.View.extend({
             //pv.render()
         }, function(error) {
             $('.error', this.el).html(error||'An error occrued while communicating with the server')
+            $('#loginSubmit',self.el).show()
         })
     }
   , setLogin: function(e)  {

@@ -15,7 +15,7 @@ PostView = Backbone.View.extend({
       , 'tap'              : 'clickedContent'
     }
   , initialize: function() {
-      _.bindAll(this,'render','remove','addPoint','removePoint','pointsChange','swiperight', 'clickedContent','reply','showComments','showMenu')
+      _.bindAll(this,'render','remove','addPoint','removePoint','pointsChange','swiperight', 'clickedContent','reply','showComments','showMenu','showImages')
       this.model.bind('change:points',this.pointsChange)
       this.template = '#postTemplate'
     }
