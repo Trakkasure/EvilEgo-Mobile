@@ -225,5 +225,4 @@ ul#posts li .images div.video {
   height: 336px;
   overflow: hidden;
 }
-.photoview .ui-content { padding: 0; }
-.photoview img { width: 100%; padding-top:60px; }
+.photoview .ui-content img { width: 100%; margin-top: 56px;}

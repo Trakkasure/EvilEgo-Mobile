@@ -61,11 +61,11 @@ CommentListView = Backbone.View.extend({
     }
   , appendComment: function(comment,collection) {
         if (!collection && this.collection.models.indexOf(comment)==-1) {
-            console.log('Post not in collection. Adding...')
+            //console.log('Post not in collection. Adding...')
             this.collection.add(comment) // we weren't called by an event
         } else {
             if (comment.collection && (comment.collection != this.collection)) {
-                console.log('removing comment from different post')
+                //console.log('removing comment from different post')
                 comment.collection.remove(comment)
             }
             comment.collection = this.collection
@@ -96,17 +96,16 @@ CommentFormView = Backbone.View.extend({
     }
   , template: '#commentFormTemplate'
   , initialize: function() {
-        console.log('New comment form view')
+        //console.log('New comment form view')
         _.bindAll(this, 'render', 'submitComment', 'updateCommentText') // remember: every function that uses 'this' as the current object should be in here
         //this.model.bind('change',this.render)
         var self = this
-        console.log('fetching')
-        console.log(this.model)
+        //console.log('fetching')
         //this.model.fetch().done(function(){self.render()})
         this.render()
     }
   , render: function() {
-        console.log('Rendering comment form')
+        //console.log('Rendering comment form')
         try {
             $('#new-comment-container',this.el).html($.tmpl($(this.template).html(),this.model.toJSON()||{})).trigger('create')
         } catch (e) {
@@ -116,9 +115,8 @@ CommentFormView = Backbone.View.extend({
     }
   , submitComment: function() {
         this.model.save().done(function(data) {
-            console.log('Comment saved')
+            //console.log('Comment saved')
             data.prettyDate = "just now"
-            console.log(data)
             EvilEgo.collections.CommentCollection.add(data)
             window.location.hash = 'comments'
         }).error(function(data) {
@@ -126,7 +124,6 @@ CommentFormView = Backbone.View.extend({
                 navigator.notification.alert('Could not save comment.\n')
             else
                 alert('Could not save comment.\n'+data||'')
-            console.log('Error saving comment.')
         })
     }
   , updateCommentText: function(e) {

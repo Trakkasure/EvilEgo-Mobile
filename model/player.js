@@ -1,8 +1,5 @@
-console.log('model/player.js')
-
 var PlayerModel = Backbone.Model.extend({
     initialize : function(defaults) {
-        console.log("init model: player")
         if (defaults && 'object' === typeof(defaults)) this.set(defaults)
         _.bindAll(this,'getNewsFeed','url')
     }

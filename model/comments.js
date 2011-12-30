@@ -38,7 +38,6 @@ CommentCollection = Backbone.Collection.extend({
 
 CommentFormModel = Backbone.Model.extend({
     url: function() { // used for saving the model to the server.
-        console.log(EvilEgo.dataHost+'/post/'+this.get('post_id')+'/comment'+(this.get('id')?'/'+this.get('id'):''))
         return EvilEgo.dataHost+'/post/'+this.get('post_id')+'/comment'+(this.get('id')?'/'+this.get('id'):'')
     }
   , initialize: function(defaults) {

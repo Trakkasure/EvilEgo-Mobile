@@ -23,7 +23,7 @@ PostView = Backbone.View.extend({
         e.stopPropagation()
         e.preventDefault()
         if(this.disableMouseEvents) return
-        console.log('Tap content')
+        //console.log('Tap content')
         //if (e.currentTarget != $('.post-delete',this.el))
         if (this.deleteOn) {
             $('.post-delete-container',this.el).hide()
@@ -47,7 +47,7 @@ PostView = Backbone.View.extend({
         return this
     }
   , showComments: function() {
-        console.log('Show comments')
+        //console.log('Show comments')
         EvilEgo.collections.CommentCollection = this.model.getComments()
         var cv = new CommentListView(EvilEgo.collections.CommentCollection)
         $('.post-menu-container',this.el).hide()
@@ -56,12 +56,11 @@ PostView = Backbone.View.extend({
         return this
     }
   , showImages: function(e) {
-        if (!this.model.images.length) return // return if there are no images.
+        if (!this.model.get('images').length) return // return if there are no images.
         e.stopPropagation()
         e.preventDefault()
-        console.log('Showing images')
-        var src = $(e.currentTarget).attr('href').split('/').pop()
-        var pv = new PhotoView(this.model,this.model.images.indexOf(src))
+        var src = $('a',e.currentTarget).attr('href').split('/').pop()
+        var pv = new ImageView(this.model,this.model.get('images').indexOf(src))
         window.location.hash = "photo"
     }
   , reply: function() {
@@ -110,7 +109,7 @@ PostView = Backbone.View.extend({
             e.preventDefault()
         }
        // if (this.deleteOn) {
-            console.log('deleting')
+            //console.log('deleting')
             //$('.post-delete-container',this.el).hide()
             //this.deleteOn = false
             this.model.remove()
@@ -165,7 +164,7 @@ PostListView = Backbone.View.extend({
     }
   , appendPost: function(post,collection){
         if (!collection && this.collection.models.indexOf(post)==-1) {
-            console.log('Post not in collection. Adding...')
+            //console.log('Post not in collection. Adding...')
             this.collection.add(post) // we weren't called by an event
         } else {
             if (post.collection && (post.collection != this.collection)) post.collection.remove(post)
@@ -176,10 +175,11 @@ PostListView = Backbone.View.extend({
     }
   , removePost: function(post,collection) {
         if (!collection) {
-            console.log('Post still in collection. Removing.')
+            //console.log('Post still in collection. Removing.')
             this.collection.remove(post) // we weren't called by an event
-        } else
-            console.log('remove post')
+        } else {
+            //console.log('remove post')
+        }
         $('ul li#'+post.get('_id')).remove() // remove from the view
         return this
     }
@@ -211,19 +211,19 @@ PostFormView = Backbone.View.extend({
       , 'tap #choose_mission'         : 'enableMissions'
     }
   , initialize: function() {
-        console.log('New post form view')
+        //console.log('New post form view')
         this.template = '#postFormTemplate'
         _.bindAll(this, 'render', 'submitPost', 'updateTitle', 'updatePostText', 'selectImage', 'enableMissions' ) // remember: every function that uses 'this' as the current object should be in here
         //this.model.bind('change',this.render)
         var self = this
-        console.log('fetching')
+        //console.log('fetching')
         this.model.fetch().done(function(){self.render()})
     }
   , render: function() {
-        console.log('Rendering form')
+        //console.log('Rendering form')
         try {
             //console.log(this.template)
-            console.log($('#new-post-container',this.el).html())
+            //console.log($('#new-post-container',this.el).html())
             $('#new-post-container',this.el).html($.tmpl($(this.template).html(),this.model.toJSON())).trigger('create')
         } catch (e) {
             console.log(e.description)
@@ -232,7 +232,7 @@ PostFormView = Backbone.View.extend({
     }
   , submitPost: function() {
         this.model.save().done(function(data) {
-            console.log('Post saved')
+            //console.log('Post saved')
             EvilEgo.collections.PostCollection.add(data)
             window.location.hash = 'newsfeed'
         })
@@ -244,11 +244,11 @@ PostFormView = Backbone.View.extend({
         this.model.set({post: e.currentTarget.value})
     }
   , selectImage: function() {
-        console.log('Selecting image')
-        console.log(JSON.stringify(navigator.camera.PictureSourceType))
+        //console.log('Selecting image')
+        //console.log(JSON.stringify(navigator.camera.PictureSourceType))
         var self = this
         navigator.camera.getPicture(function (imageURI) {
-            console.log(imageURI)
+            //console.log(imageURI)
             //$('#post_form').append('<input type="file" value="'+file_path+'" />')
             var options = new FileUploadOptions()
             options.fileKey="file"
@@ -268,21 +268,21 @@ PostFormView = Backbone.View.extend({
             $('#uploaded_images').append(loader)
 
             var s = function(results) {
-                console.log('Upload complete')
+                //console.log('Upload complete')
                 var data = JSON.parse(results.response)
                 this.model.images.push(data.data)
                 //console.log($('#uploaded_images').append('<input type="hidden" name="images[]" value="'+data.data+'" />'))
                 loader.remove()
             }
             var f = function(error) {
-                console.log('Upload failed')
+                //console.log('Upload failed')
                 loader.remove()
                 img.remove()
             }
             var ft = new FileTransfer()
             ft.upload(imageURI, EvilEgo.dataHost+'/post/image/'+self.model.get('owner'),s,f,options)
         }, function (e) {
-            console.log(e)
+            //console.log(e)
             if (navigator.notification) navigator.notification.alert("An error occurred while choosing an image.")
             else alert('Failed to choose an image')
         },{

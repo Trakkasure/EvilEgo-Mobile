@@ -49,7 +49,7 @@
             document.addEventListener("deviceready", _ready.resolve, false);
             $(function() {
                 console.log('On body load')
-                if (!PhoneGap.available) {
+                if ('undefined' === typeof(PhoneGap) || !PhoneGap.available) {
                     console.log('Running outside of mobile device')
                     setTimeout('_ready.resolve()',1000) // delay the resolve so phonegap can call it first if it is loaded
                 }
@@ -169,17 +169,16 @@
             </div> 
         </div>
         <div data-role="page" id="photo" data-fullscreen="true" class="photoview">
-            <div data-role="header">
+            <div data-role="header" data-position="fixed"> 
                 <h1 style="margin-top: 5px; margin-bottom: 0"><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
             </div>
             <div data-role="content" >        
                 <img src="" alt="Image"  />        
             </div>
-            <div data-role="footer">
-                <a href="#" id="prev-photo" class="prev">Prev</a>
+            <div data-role="footer" class="ui-bar footer" data-position="fixed"> 
                 <a href="#" data-role="button" data-icon="arrow-l" id='prev-photo'>Prev</a>
                 <a href="#" data-role="button" data-icon="arrow-r" id='next-photo'>Next</a>
-                <a href="#" data-role="button" data-icon="back" id='bock-photo'>Back</a>
+                <a href="#" data-role="button" data-icon="back" id='back-photo'>Back</a>
             </div>
         </div>
     </body>
