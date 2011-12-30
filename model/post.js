@@ -40,8 +40,8 @@ PostModel = Backbone.Model.extend({
     }
   , getComments: function() {
         var cm = new CommentCollection({post_id: this.get('_id')})
-        var cv = new CommentListView(cm)
-        cm.fetch().done(cm.render).error(function(){window.location.hash='newsfeed'})
+        cm.fetch()//.error(function(){window.location.hash='newsfeed'})
+        return cm
     }
   , url: function() {
       return EvilEgo.dataHost+'/post/'+this.get('_id')

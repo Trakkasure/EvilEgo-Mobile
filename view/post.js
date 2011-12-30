@@ -7,11 +7,12 @@ PostView = Backbone.View.extend({
         'tap .vote_up'     : 'addPoint'
       , 'tap .vote_down'   : 'removePoint'
       , 'tap .post-delete' : 'remove'
-      , 'swiperight'         : 'swiperight'
-      , 'swipeleft'          : 'swipeleft'
-      , 'tap'              : 'clickedContent'
+      , 'swiperight'       : 'swiperight'
+      , 'swipeleft'        : 'swipeleft'
+      , 'tap .images .image' : 'showImages'
       , 'tap .post-reply'  : 'reply'
       , 'tap .post-view-comments': 'showComments'
+      , 'tap'              : 'clickedContent'
     }
   , initialize: function() {
       _.bindAll(this,'render','remove','addPoint','removePoint','pointsChange','swiperight', 'clickedContent','reply','showComments','showMenu')
@@ -47,14 +48,27 @@ PostView = Backbone.View.extend({
     }
   , showComments: function() {
         console.log('Show comments')
-        this.model.getComments()
+        EvilEgo.collections.CommentCollection = this.model.getComments()
+        var cv = new CommentListView(EvilEgo.collections.CommentCollection)
         $('.post-menu-container',this.el).hide()
         this.menuOn = false
         window.location.hash = 'comments'
         return this
     }
+  , showImages: function(e) {
+        if (!this.model.images.length) return // return if there are no images.
+        e.stopPropagation()
+        e.preventDefault()
+        console.log('Showing images')
+        var src = $(e.currentTarget).attr('href').split('/').pop()
+        var pv = new PhotoView(this.model,this.model.images.indexOf(src))
+        window.location.hash = "photo"
+    }
   , reply: function() {
         new CommentFormView({model: new CommentFormModel({post_id: this.model.get('_id')})})
+        EvilEgo.collections.CommentCollection = this.model.getComments()
+        var cv = new CommentListView(EvilEgo.collections.CommentCollection) // load it up.
+        $('.post-menu-container',this.el).hide()
         window.location.hash = 'new-comment'
         return this
     }
@@ -283,3 +297,4 @@ PostFormView = Backbone.View.extend({
     }
 
 })
+

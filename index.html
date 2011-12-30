@@ -13,9 +13,14 @@
         <link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />		
         -->
         <!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
-        <script type="text/javascript" charset="utf-8" src="../phonegap-1.2.0.js"></script>
         <script src="js/jquery.min.js"></script>
         <script src="js/jquery.mobile-1.0.min.js"></script>
+        <script type="text/javascript">
+            $.getScript("../phonegap-1.2.0.js").error(function() {
+                console.log('Error loading script')
+                $.getScript("phonegap-1.2.0.js")
+            })
+        </script>
 
         <script src="js/underscore-min.js"></script>
         <script src="js/backbone-min.js"></script>
@@ -81,8 +86,8 @@
                 sameOrigin = location.origin
                 EvilEgo.dataHost = (window.device&&window.device.phonegap)?'http://mobile.evilego.com:4000':sameOrigin
                 
-                if (console.log == logCatcher) console.log=_oldlog
-                _(logs).each(function(t){console.log.apply(console,t)})
+//                if (console.log == logCatcher) console.log=_oldlog
+//                _(logs).each(function(t){console.log.apply(console,t)})
 
                 loaded.resolve()
 
@@ -139,7 +144,7 @@
             </div> 
             <div id="comments-container" data-role='content'></div>
             <div data-role="footer" class="ui-bar footer" data-position="fixed"> 
-                <a href="#newsfeed" data-role="button" data-icon="arrow-l">Back</a>
+                <a href="#newsfeed" data-role="button" data-icon="back">Back</a>
                 <a href="#new-comment" data-role="button" data-icon="plus" data-inline="true" id="new-comment-button">Add Comment</a>
             </div> 
         </div>
@@ -150,7 +155,7 @@
             </div> 
             <div id="new-post-container" data-role='content'></div>
             <div data-role="footer" class="ui-bar footer" data-position="fixed"> 
-                <a href="#newsfeed" data-role="button" data-icon="arrow-l">Back</a>
+                <a href="#newsfeed" data-role="button" data-icon="back">Back</a>
             </div> 
         </div>
         <!-- NEW COMMENT PAGE -->
@@ -160,8 +165,22 @@
             </div> 
             <div id="new-comment-container" data-role='content'></div>
             <div data-role="footer" class="ui-bar footer" data-position="fixed"> 
-                <a href="#comments" data-role="button" data-icon="arrow-l" id='cancel-comment'>Back</a>
+                <a href="#comments" data-role="button" data-icon="back" id='cancel-comment'>Back</a>
             </div> 
+        </div>
+        <div data-role="page" id="photo" data-fullscreen="true" class="photoview">
+            <div data-role="header">
+                <h1 style="margin-top: 5px; margin-bottom: 0"><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
+            </div>
+            <div data-role="content" >        
+                <img src="" alt="Image"  />        
+            </div>
+            <div data-role="footer">
+                <a href="#" id="prev-photo" class="prev">Prev</a>
+                <a href="#" data-role="button" data-icon="arrow-l" id='prev-photo'>Prev</a>
+                <a href="#" data-role="button" data-icon="arrow-r" id='next-photo'>Next</a>
+                <a href="#" data-role="button" data-icon="back" id='bock-photo'>Back</a>
+            </div>
         </div>
     </body>
 
@@ -216,8 +235,8 @@
         function logCatcher() {
             logs.push(arguments)
         }
-        _oldlog = console.log
-        console.log=logCatcher
+//        _oldlog = console.log
+//        console.log=logCatcher
 
     </script>
     <script src="js/jquery.tmpl.min.js"></script>
@@ -229,6 +248,7 @@
     <script src="view/post.js"></script>
     <script src="model/comments.js"></script>
     <script src="view/comments.js"></script>
+    <script src="view/photo.js"></script>
     <script src="js/jquery.infinitescroll.min.js"></script>
     <script type="text/javascript">
         //Backbone.history.start()
