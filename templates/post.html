@@ -48,7 +48,17 @@
     </div>
     
     <!-- POST FOOTER-->
-    <div class="comment-count ${type}">${comments} comments</div>
+    <div class="comment-count ${type}">
+        {{if comments > 0}}
+        <a href="#comments" class="post-view-comments">
+            ${comments} comments
+        </a>
+        {{else}}
+        <a href="#newComment" class="post-reply">
+            ${comments} comments
+        </a>
+        {{/if}}
+    </div>
     <div class="date">
         <!-- DATE-->
         posted ${prettyDate} &nbsp;
@@ -60,7 +70,8 @@
             {{if hasImage}}
                 {{each images}}
                     <div class="image">
-                        <a href="http://evilego.com/uploads/${$value}" class="view_image">
+                        <!-- <a href="http://evilego.com/uploads/${$value}" class="view_image"> -->
+                        <a href="#photo/${$value}" class="view_image">
                             <img src="http://evilego.com/uploads/th_${$value}">
                         </a>
                     </div>

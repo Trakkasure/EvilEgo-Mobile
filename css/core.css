@@ -168,7 +168,7 @@ ul#posts li .points .vote_down {
   -webkit-box-shadow: 0 3px 3px #333333;
   z-index: 1;
 }
-ul#posts li .points .vote_up, {
+ul#posts li .points .vote_up {
   top: -5px;
   -webkit-border-top-left-radius: 4px;
   -webkit-border-top-right-radius: 4px;
@@ -224,5 +224,9 @@ ul#posts li .images div.video {
   width: 598px;
   height: 336px;
   overflow: hidden;
+}
+
+#posts .ui-link {
+    color: #FF9733;
 }
 .photoview .ui-content img { width: 100%; margin-top: 56px;}

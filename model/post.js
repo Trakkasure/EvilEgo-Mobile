@@ -22,14 +22,14 @@ PostModel = Backbone.Model.extend({
     } 
   , addPoint: function() {
         var self = this
-        $.get(this.url()+'/vote/1').done(function(data){
+        return $.get(this.url()+'/vote/1').done(function(data){
             var points = data.points
             self.set({points:data.points})
         })
     }
   , removePoint: function() {
         var self = this
-        $.get(this.url()+'/vote/-1').done(function(data){
+        return $.get(this.url()+'/vote/-1').done(function(data){
             var points = data.points
             self.set({points:data.points})
         })

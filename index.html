@@ -15,11 +15,9 @@
         <!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
         <script src="js/jquery.min.js"></script>
         <script src="js/jquery.mobile-1.0.min.js"></script>
+        <script type="text/javascript" charset="utf-8" src="phonegap-1.2.0.js"></script>
         <script type="text/javascript">
-            $.getScript("../phonegap-1.2.0.js").error(function() {
-                console.log('Error loading script')
-                $.getScript("phonegap-1.2.0.js")
-            })
+            //$.getScript("../phonegap-1.2.0.js")
         </script>
 
         <script src="js/underscore-min.js"></script>
@@ -46,14 +44,16 @@
             */
 
             var _ready = $.Deferred()
-            document.addEventListener("deviceready", _ready.resolve, false);
-            $(function() {
-                console.log('On body load')
+
+            function onBodyLoad() {
+                document.addEventListener("deviceready", _ready.resolve, false)
+                //console.log('On body load')
+                console.log(PhoneGap.DeviceInfo)
                 if ('undefined' === typeof(PhoneGap) || !PhoneGap.available) {
                     console.log('Running outside of mobile device')
-                    setTimeout('_ready.resolve()',1000) // delay the resolve so phonegap can call it first if it is loaded
+                    setTimeout('_ready.resolve()',2000) // delay the resolve so phonegap can call it first if it is loaded
                 }
-            })
+            }
 
             /* When this function is called, PhoneGap has been initialized and is ready to roll */
             /* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
@@ -62,8 +62,8 @@
 
             var lastLogin = {}
             _ready.done(function () {
-                        // do your thing!
-                        //if (navigator.notification) navigator.notification.alert("PhoneGap is working")
+                // do your thing!
+                //if (navigator.notification) navigator.notification.alert("PhoneGap is working")
 
                 // First thing to do is to get the user's stored mobile login token, if there is one. otherwise we will ask them ot log in.
                 // var db = window.openDatabase("EvilEgo", "1.0", "EvilEgo Local Storage", 200000);
@@ -83,11 +83,10 @@
                     EvilEgo.loggedInUser = JSON.parse(window.localStorage.getItem(lastLogin))
                 }
 
-                sameOrigin = location.origin
-                EvilEgo.dataHost = (window.device&&window.device.phonegap)?'http://mobile.evilego.com:4000':sameOrigin
                 
-//                if (console.log == logCatcher) console.log=_oldlog
-//                _(logs).each(function(t){console.log.apply(console,t)})
+                if (console.log == logCatcher) console.log=_oldlog
+                if (logs && logs.length)
+                    _(logs).each(function(t){if (t && t.length) console.log.apply(console,t)})
 
                 loaded.resolve()
 
@@ -114,7 +113,7 @@
             })
         </script>
     </head>
-    <body style="-webkit-user-select: none; -webkit-touch-callout: none;"> 
+    <body onload="onBodyLoad()" style="-webkit-user-select: none; -webkit-touch-callout: none;"> 
         <!-- LOGIN PAGE -->
         <div data-role="page" id="login" data-theme="a">
             <div data-role="header" data-position="fixed"> 
@@ -170,16 +169,17 @@
         </div>
         <div data-role="page" id="photo" data-fullscreen="true" class="photoview">
             <div data-role="header" data-position="fixed"> 
-                <h1 style="margin-top: 5px; margin-bottom: 0"><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
+                <div class="photocount" style="float:right;margin-top: 20px; margin-right:10px;"></div>
+                <div class="photocount" style="float:left;margin-top: 20px; margin-left:10px;"></div>
+                <h1 style="margin-top: 5px; margin-bottom: 0; margin-right: auto"><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
             </div>
-            <div data-role="content" >        
-                <img src="" alt="Image"  />        
+            <div data-role="content" class="content">
             </div>
-            <div data-role="footer" class="ui-bar footer" data-position="fixed"> 
-                <a href="#" data-role="button" data-icon="arrow-l" id='prev-photo'>Prev</a>
-                <a href="#" data-role="button" data-icon="arrow-r" id='next-photo'>Next</a>
-                <a href="#" data-role="button" data-icon="back" id='back-photo'>Back</a>
-            </div>
+            <!-- div data-role="footer" class="ui-bar footer" data-position="fixed"> 
+                <a href="#" data-inline="true" data-role="button" data-icon="arrow-l" id='prev-photo'>Prev</a>
+                <a href="#" data-inline="true" data-role="button" data-icon="arrow-r" id='next-photo'>Next</a>
+                <a href="#" data-inline="true" data-role="button" data-icon="back" id='back-photo'>Back</a>
+                </div -->
         </div>
     </body>
 
@@ -232,10 +232,11 @@
 // Handle iOS not being ready to log console messages.
         logs = []
         function logCatcher() {
+            if (!arguments || !arguments.length) return
             logs.push(arguments)
         }
-//        _oldlog = console.log
-//        console.log=logCatcher
+        //_oldlog = console.log
+        //console.log=logCatcher
 
     </script>
     <script src="js/jquery.tmpl.min.js"></script>
@@ -252,9 +253,15 @@
     <script type="text/javascript">
         //Backbone.history.start()
         loaded = $.Deferred()
-        $.when(lfd,loaded).done(function(data) {
+        $.when(loaded).done(function(data) {
+            //Backbone.history.start()
             console.log('Load complete. Display login form')
             Login = new LoginView ({model: new UserModel({login:EvilEgo.currentUser||'',password:lastLogin.password})})
+            if (navigator && navigator.splashscreen && navigator.splashscreen.hide)
+                navigator.splashscreen.hide()
+            sameOrigin = window.location.origin
+            EvilEgo.dataHost = (DeviceInfo&&DeviceInfo.platform)?'http://mobile.evilego.com:4000':sameOrigin
+            //EvilEgo.dataHost ='http://mobile.evilego.com:4000'
         }).fail(function(data) {
             console.log('Error load.')
             console.log(data)

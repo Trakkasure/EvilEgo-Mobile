@@ -60,6 +60,7 @@ PostView = Backbone.View.extend({
         e.stopPropagation()
         e.preventDefault()
         var src = $('a',e.currentTarget).attr('href').split('/').pop()
+        console.log('Showing image '+src)
         var pv = new ImageView(this.model,this.model.get('images').indexOf(src))
         window.location.hash = "photo"
     }
@@ -128,14 +129,32 @@ PostView = Backbone.View.extend({
   , addPoint: function(e) {
         e.stopPropagation()
         e.preventDefault()
-        this.model.addPoint()
-        return this
+        var el = $(e.currentTarget)
+        var p  = el.position()
+        var loader = $('<img src="images/loading_sm_icon.gif" />')
+        el.hide()
+        loader.attr('top',p.top+10)
+        loader.attr('left',p.left+10)
+        el.parent().append(loader)
+        return this.model.addPoint().done(function() {
+            el.show()
+            loader.remove()
+        })
     }
   , removePoint: function(e) {
         e.stopPropagation()
         e.preventDefault()
-        this.model.removePoint()
-        return this
+        var el = $(e.currentTarget)
+        var p  = el.position()
+        var loader = $('<img src="images/loading_sm_icon.gif" />')
+        el.hide()
+        loader.attr('top',p.top+10)
+        loader.attr('left',p.left+10)
+        el.parent().append(loader)
+        return this.model.removePoint().done(function() {
+            el.show()
+            loader.remove()
+        })
     }
 
 })

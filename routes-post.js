@@ -32,5 +32,4 @@ var PostRoutes = Backbone.Router.extend({
     }
 
 });
-console.log('Loaded post routes')
 PostRouter = new PostRoutes
