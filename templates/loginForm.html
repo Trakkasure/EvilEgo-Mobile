@@ -1,11 +1,11 @@
-<div id="content" data-role="content">
+<div id="content"  data-theme="a" data-role="content">
     <form action="#user/login" method="post" onsubmit="return false">
         <div class="error"></div>
-        <input type="text" id="loginName" name="login" value="${login}" placeholder="Login Name" /> <br />
-        <input type="password" id="password" name="password" placeholder="Password" /> <br />
+        <input type="text" id="loginName" name="login" value="${login}" placeholder="Login Name"  ata-theme="a" /> <br />
+        <input type="password" id="password" name="password" placeholder="Password" data-theme="a" /> <br />
         <span style="text-align: center'">
-            <input type="checkbox" id="save" name="save" data-role="none" /><label for="save">Remember me</label> <br />
+            <input type="checkbox" id="save" name="save" data-role="none" data-theme="a" /><label for="save" data-theme="a">Remember me</label> <br />
         </span>
-        <button id="loginSubmit">Login</button>
+        <a href="#" id="loginSubmit" data-role="button" data-theme="a">Login</a>
     </form>
 </div>

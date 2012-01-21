@@ -7,6 +7,7 @@
         
         <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" />
         <link rel="stylesheet" href="css/core.css" />
+        <link rel="stylesheet" type="text/css" href="http://assets.transloadit.com/css/transloadit2.css" />
 
         <!-- iPad/iPhone specific css below, add after your main css >
         <link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />		
@@ -15,17 +16,39 @@
         <!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
         <script src="js/jquery.min.js"></script>
         <script src="js/jquery.mobile-1.0.min.js"></script>
+        <script type="text/javascript" src="js/underscore-min.js"></script>
+        <script type="text/javascript" src="js/json2.js"></script>
         <script type="text/javascript" charset="utf-8" src="phonegap-1.2.0.js"></script>
-        <script type="text/javascript">
-            //$.getScript("../phonegap-1.2.0.js")
-        </script>
+        <script type="text/javascript" charset="utf-8" src="../phonegap-1.2.0.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/notificationex.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/ChildBrowser.js"></script>
+        <script type="text/javascript" src="js/backbone-min.js"></script>
+        <script type="text/javascript" src="js/jquery.transloadit2.js"></script>
+        <script type="text/javascript" src="js/notifier.js"></script>
 
-        <script src="js/underscore-min.js"></script>
-        <script src="js/backbone-min.js"></script>
-        <script src="js/json2.js"></script>
-
         <script type="text/javascript">
-            
+
+            Hoptoad.setKey('fb1f4b34303ea8084ce3a69743b31fc9')
+            Hoptoad.setEnvironment('mobile')
+            Hoptoad.setErrorDefaults({
+                url: "http://evilego.com/mobile"
+              , component: "mobile"
+              , action: "show"
+            })
+
+            window.onerror = function(message,file,line) {
+                Hoptoad.notify({
+                    message : message
+                  , stack   : '()@' + file + ':' + line
+                }).done(function() {
+                    if (navigator.notification) navigator.notification.alert("An unexpected error occured.",function(){location.reload()})
+                    else alert('An unexpected error occured.')
+                }).error(function() {
+                    if (navigator.notification) navigator.notification.alert("An unexpected error occured.",function(){location.reload()})
+                    else alert('An unexpected error occured.')
+                })
+                return false
+            }
             // If you want to prevent dragging, uncomment this section
             function preventBehavior(e) {
                 e.preventDefault(); 
@@ -61,6 +84,8 @@
             for more details -jm */
 
             var lastLogin = {}
+              , root = this
+              , childBrowser = null
             _ready.done(function () {
                 // do your thing!
                 //if (navigator.notification) navigator.notification.alert("PhoneGap is working")
@@ -68,6 +93,16 @@
                 // First thing to do is to get the user's stored mobile login token, if there is one. otherwise we will ask them ot log in.
                 // var db = window.openDatabase("EvilEgo", "1.0", "EvilEgo Local Storage", 200000);
 
+                //childBrowser = ChildBrowser.install(); 
+
+                var cb = childBrowser = ChildBrowser.install()
+                if(cb != null) { 
+                    cb.onLocationChange = function(loc) { 
+                        root.locChanged(loc)
+                    } 
+                    cb.onClose = function(){root.onCloseBrowser()}
+                    cb.onOpenExternal = function(){root.onOpenExternal()}
+                }
                 if (window.localStorage) {
                     var x = window.localStorage.getItem('lastLogin')
                     if (x) {
@@ -82,11 +117,14 @@
                     if (lastLogin.login != '')
                     EvilEgo.loggedInUser = JSON.parse(window.localStorage.getItem(lastLogin))
                 }
-
                 
                 if (console.log == logCatcher) console.log=_oldlog
                 if (logs && logs.length)
-                    _(logs).each(function(t){if (t && t.length) console.log.apply(console,t)})
+                    _.each(logs,function(t){
+                        if (t && t.length && t[0] != null) {
+                            console.log.apply(console,t)
+                            }
+                    })
 
                 loaded.resolve()
 
@@ -117,9 +155,9 @@
         <!-- LOGIN PAGE -->
         <div data-role="page" id="login" data-theme="a">
             <div data-role="header" data-position="fixed"> 
-                <h1 style="margin-top: 5px; margin-bottom: 0">
+                <div class='logo'>
                     <img src="images/logo_horizontal_sm.png" alt="EvilEgo.com" />
-                </h1> 
+                </div> 
             </div> 
             <div id="loginContainer"></div>
         </div>
@@ -127,51 +165,66 @@
         <!-- NEWSFEED PAGE -->
         <div data-role="page" id="newsfeed" data-theme="a">
             <div data-role="header" data-position="fixed"> 
-                <h1 style="margin-top: 5px; margin-bottom: 0"><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
+                <div class="header-button right">
+                    <a href="#new-post" data-theme="a" data-role="button" data-icon="plus" data-inline="true" id="new-post-button"></a>
+                </div>
+                <div class="header-button left">
+                    <a href="#newsfeed" data-theme="a" data-role="button" data-icon="refresh" data-inline="true" id="refresh-post-button"></a>
+                    <!-- a href="#login" id="logout-button">Logout</a -->
+                </div>
+                <div class="logo"><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></div> 
             </div> 
-            <div id="newsfeed-container" data-role='content'></div>
-            <div data-role="footer" class="ui-bar footer" data-position="fixed"> 
-                <a href="#newsfeed" data-role="button" data-icon="refresh" data-inline="true" id="refresh-post-button">Refresh</a>
-                <a href="#new-post" data-role="button" data-icon="plus" data-inline="true" id="new-post-button">Add Post</a>
-            </div> 
+            <div id="newsfeed-container"></div>
         </div>
         
-        <!-- COMMENTS PAGE -->
-        <div data-role="page" id="comments" data-theme="a">
-            <div data-role="header" data-position="fixed"> 
-                <h1 style="margin-top: 5px; margin-bottom: 0"><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
-            </div> 
-            <div id="comments-container" data-role='content'></div>
-            <div data-role="footer" class="ui-bar footer" data-position="fixed"> 
-                <a href="#newsfeed" data-role="button" data-icon="back">Back</a>
-                <a href="#new-comment" data-role="button" data-icon="plus" data-inline="true" id="new-comment-button">Add Comment</a>
-            </div> 
-        </div>
         <!-- NEW POST PAGE -->
         <div data-role="page" id="new-post" data-theme="a">
             <div data-role="header" data-position="fixed"> 
-                <h1 style="margin-top: 5px; margin-bottom: 0"><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
+                <div class="header-button right">
+                    <a href="#" style="width: 50px;text-decoration: none;"> </a>
+                </div>
+                <div class="header-button left">
+                    <a href="#newsfeed" data-theme="a" data-role="button" data-icon="back" data-inline="true"></a>
+                </div>
+                <div class='logo'><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></div> 
             </div> 
             <div id="new-post-container" data-role='content'></div>
-            <div data-role="footer" class="ui-bar footer" data-position="fixed"> 
-                <a href="#newsfeed" data-role="button" data-icon="back">Back</a>
-            </div> 
         </div>
+
+        <!-- COMMENTS PAGE -->
+        <div data-role="page" id="comments" data-theme="a">
+            <div data-role="header" data-position="fixed"> 
+                <div class="header-button right">
+                    <a href="#new-comment" data-theme="a" data-role="button" data-icon="plus" data-inline="true" id="new-comment-button"></a>
+                </div>
+                <div class="header-button left">
+                    <a href="#newsfeed" data-theme="a" data-role="button" data-icon="back" data-inline="true"></a>
+                </div>
+                <div class='logo'><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></div> 
+            </div> 
+            <div id="comments-container"></div>
+        </div>
+
         <!-- NEW COMMENT PAGE -->
         <div data-role="page" id="new-comment" data-theme="a">
             <div data-role="header" data-position="fixed"> 
-                <h1 style="margin-top: 5px; margin-bottom: 0"><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
+                <div class="header-button right">
+                    <a href="#" style="width: 50px;text-decoration: none;"> </a>
+                </div>
+                <div class="header-button left">
+                    <a href="#" data-theme="a" data-role="button" data-icon="back" id="cancel-comment"></a>
+                </div>
+                <div class='logo'><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></div> 
             </div> 
             <div id="new-comment-container" data-role='content'></div>
-            <div data-role="footer" class="ui-bar footer" data-position="fixed"> 
-                <a href="#comments" data-role="button" data-icon="back" id='cancel-comment'>Back</a>
-            </div> 
         </div>
         <div data-role="page" id="photo" data-fullscreen="true" class="photoview">
             <div data-role="header" data-position="fixed"> 
                 <div class="photocount" style="float:right;margin-top: 20px; margin-right:10px;"></div>
-                <div class="photocount" style="float:left;margin-top: 20px; margin-left:10px;"></div>
-                <h1 style="margin-top: 5px; margin-bottom: 0; margin-right: auto"><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></h1> 
+                <div class="header-button left">
+                    <a href="#newsfeed" data-theme="a" data-role="button" data-icon="back" data-inline="true"></a>
+                </div>
+                <div class='logo'><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></div> 
             </div>
             <div data-role="content" class="content">
             </div>
@@ -231,12 +284,12 @@
 
 // Handle iOS not being ready to log console messages.
         logs = []
-        function logCatcher() {
+        function logCatcher(a,b) {
             if (!arguments || !arguments.length) return
             logs.push(arguments)
         }
-        //_oldlog = console.log
-        //console.log=logCatcher
+        _oldlog = console.log
+        console.log=logCatcher
 
     </script>
     <script src="js/jquery.tmpl.min.js"></script>

@@ -1,6 +1,6 @@
 var PlayerModel = Backbone.Model.extend({
     initialize : function(defaults) {
-        if (defaults && 'object' === typeof(defaults)) this.set(defaults)
+        this.set(defaults)
         _.bindAll(this,'getNewsFeed','url')
     }
   , getNewsFeed: function() {

@@ -1,4 +1,4 @@
-{{if newComments > 0}}
+{{if newComments }}
     <div class="new-comment-count ${type}">${newComments}</div>
 {{/if}}
     {{if canVote }}
@@ -8,23 +8,24 @@
             <!-- VOTE-->
             <!-- VOTE UP-->
             <a href="#" class="vote_up">
-                <img src="http://evilego.com/images/core/icon_vote_up.png">
+                <img src="images/core/icon_vote_up.png">
             </a>
 
             <!-- VOTE DOWN-->
             <a href="#" class="vote_down">
-                <img src="http://evilego.com/images/core/icon_vote_down.png">
+                <img src="images/core/icon_vote_down.png">
             </a>
         </div>
     {{/if}}
 
     <!-- AVATAR -->
-    <a href="#profile/${owner}" class="post_avatar show_mini">
+    <a href="#" class="post_avatar show_mini">
         <img src="http://evilego.com/avatars/${owner}_icon.png">
     </a>
     
     <!-- TITLE-->
-    <a href="#porfile/${owner}">${owner}</a>
+    <!-- a href="#profile/${owner}">${owner}</a -->
+    <a href="#">${owner}</a>
     <h3>
         ${title}
     </h3>
@@ -36,14 +37,16 @@
     
     {{if canDelete}}
         <div class="post-delete-container">
-            <a href="#" data-role="button" data-icon="delete" class="post-delete" >Delete</a>
+            <div style='position: relative'>
+                <a href="#" data-role="button" data-icon="delete" data-inline="true" class="post-delete" >Delete</a>
+            </div>
         </div>
     {{/if}}
 
     <div class="post-menu-container">
-        <a href="#newComment" data-role="button" data-icon="back" data-inline="true" class="post-reply" >Reply</a>
+        <a href="#new-comment" data-role="button" data-icon="plus" data-inline="true" class="post-reply" >Reply</a>
         {{if comments > 0}}
-        <a href="#comments" data-role="button" data-icon="arrow-r" data-inline="true" class="post-view-comments" >Comments</a>
+        <a href="#" data-role="button" data-icon="arrow-r" data-inline="true" class="post-view-comments" >Comments</a>
         {{/if}}
     </div>
     
@@ -55,7 +58,7 @@
         </a>
         {{else}}
         <a href="#newComment" class="post-reply">
-            ${comments} comments
+            0 comments
         </a>
         {{/if}}
     </div>
@@ -78,11 +81,11 @@
                 {{/each}}
             {{/if}}
             {{if hasVideo}}
-                {{if video.video_url}}
-                    <div class="video">
-                        <a href="${video.video_url}" id="video_${_id}" class="video_player"></a>
-                    </div>
-                {{/if}}
+                <div class="video">
+                    <video style="max-width: 230px;" autobuffer ontap="this.play()" onclick="this.play()">
+                        <source src="${video.mobile_video_url}" />
+                    </video>
+                </div>
             {{/if}}
         </div>
     {{/if}}

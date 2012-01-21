@@ -29,10 +29,23 @@ body {
   font-family: arial;
 }
 
-.post-delete-container { display: none; position: absolute; top:0px; left: 0px;}
-.post-delete-container { display: none; position: absolute; top:0px; left: 0px;}
+.comment-delete-container,
+.post-delete-container { 
+    display: none; 
+    position: absolute; 
+    top:0px; 
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,.5)
+}
 
-.post-menu-container { display: none; position: absolute; top:0px; left: 0px;}
+.post-menu-container { 
+    display: none; 
+    position: absolute; 
+    top:0px; 
+    left: 0px;
+}
 
 
 /* login */
@@ -221,8 +234,6 @@ ul#posts li .images div.video {
   float: left;
   margin-left: 12px;
   margin-bottom: 12px;
-  width: 598px;
-  height: 336px;
   overflow: hidden;
 }
 
@@ -230,3 +241,42 @@ ul#posts li .images div.video {
     color: #FF9733;
 }
 .photoview .ui-content img { width: 100%; margin-top: 56px;}
+
+input#video_upload_file_select {
+    background: none;
+    border: none;
+    color: #ffffff;
+    -moz-opacity: 0;
+    -khtml-opacity: 0;
+    -webkit-opacity: 0;
+    opacity: 0;
+    filter: alpha(opacity=0.7);
+    height: 24px;
+    width: 44px;
+    padding: 0;
+}
+
+.ui-header .logo {
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+    .ui-header .logo img {
+        width: 137px;
+    }
+
+    .ui-header .header-button.right {
+        margin: 15px 10px 0 0px;
+        float: right;
+    }
+    .ui-header .header-button.left {
+        margin: 15px 0 0 10px;
+        float: left;
+    }
+        .ui-header .header-button .ui-btn-inner {
+            padding-left: 20px;
+            font-size: 24px;
+        }
+        .ui-header .header-button .ui-icon{
+            left: 5px;
+        }

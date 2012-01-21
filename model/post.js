@@ -5,6 +5,7 @@ PostModel = Backbone.Model.extend({
       , post:  'This is an empty post'
       , isEmpty: true
     }
+  , fetchTimer: null
   , initialize: function(defaults) {
         if (defaults && 'object' === typeof(defaults))
             this.set(defaults)
@@ -13,11 +14,12 @@ PostModel = Backbone.Model.extend({
         // Used in the template to show/hide the point voting section
         this.set({
             canVote  : ((images && images.length) || (video && video.video_url))?1:0 // Used in the template to output a delete node to show when post swiped
-          , hasVideo : (video && video.video_url)?1:0  // Used in the template to output a delete node to show when post swiped
+          , hasVideo : (video && video.mobile_video_url)?1:0  // Used in the template to output a delete node to show when post swiped
           , hasImage : (images && images.length)?1:0 // Used in the template to output a delete node to show when post swiped
-          , canDelete: (this.get('owner') == EvilEgo.currentUser)
+          , canDelete: (this.get('owner').toLowerCase() == EvilEgo.currentUser.toLowerCase())
           , newComments : 0
         })
+        //console.log(this.get('canDelete'))
         _.bindAll(this,'addPoint','removePoint','remove','url','getComments')
     } 
   , addPoint: function() {
@@ -36,11 +38,16 @@ PostModel = Backbone.Model.extend({
     }
   , remove: function() {
         if (this.get('canDelete'))
-            this.destroy()
+            return this.destroy().done(function() {
+                console.log('Delete done')
+            }).error(function() {
+                console.log('Delete error')
+            })
+        else return $.Deferred().fail()
     }
-  , getComments: function() {
+  // Isolate means to not set the global CommentCollection.
+  , getComments: function(isolate) {
         var cm = new CommentCollection({post_id: this.get('_id')})
-        cm.fetch()//.error(function(){window.location.hash='newsfeed'})
         return cm
     }
   , url: function() {
@@ -51,7 +58,7 @@ PostModel = Backbone.Model.extend({
 PostCollection = Backbone.Collection.extend({
     type: 'newsfeed'
   , model: PostModel
-
+  , lastPlayer: null
   , initialize: function() {
         var now = (new Date()).getTime()
           , self = this
@@ -60,21 +67,52 @@ PostCollection = Backbone.Collection.extend({
             return (now - x)
         }
         _.bindAll(this,'setType','fetchPosts')
+        //this.bind('add',function(post) { post.collection = this })
+        //this.bind('remove',function(post) { delete post['collection'] })
+        //this.bind('reset',function() { var self=this; _(this.models).each(function(item){item.collection = self})})
     }
   , setType: function(type) {
         this.type = type
     }
-  , fetchPosts: function(player) {
+  , fetchPosts: function(player,page) {
         //console.log('Fetching posts for '+player)
         var self = this
+        if (player) this.lastPlayer = player
         switch(this.type) {
             case 'newsfeed':
-                this.url = EvilEgo.dataHost+'/user/'+(player||EvilEgo.loggedInUser.get('login'))+'/newsfeed'
-                this.trigger('loading')
-                this.fetch({success: function(){self.trigger('load_done')},error: function(err) {self.trigger('load_error')}})
+                if (this.fetchTimer) return
+                this.url = EvilEgo.dataHost+'/user/'+(this.lastPlayer||EvilEgo.loggedInUser.get('login'))+'/newsfeed'
+                if (navigator.notificationEx)
+                    navigator.notificationEx.loadingStart({labelText:'Getting Newsfeed...'})
+                var d = this.fetch({data:{page:page||0},add:(page&&page>0)}).done(function(data) {
+                    //console.log('Resetting newsfeed')
+                    //self.reset([],{silent:true}) // clear the contents and throw events.
+                    console.log('Done fetching newsfeed')
+                    clearTimeout(self.fetchTimer)
+                    self.fetchTimer = null
+                    if (navigator.notificationEx)
+                        navigator.notificationEx.loadingStop()
+                }).error(function() {
+                    console.log('Failed fetching newsfeed')
+                    if (navigator.notificationEx)
+                        navigator.notificationEx.loadingStop()
+                })
+                this.fetchTimer = setTimeout(d.fail,30000) // 30 second timeout for getting newsfeeds
+                return d
             break
         }
         return this
+    }
+  , logout: function() {
+        return $.ajax({
+            url: '/logout'
+          , type: "get"
+          , success: function(data) {
+                window.location.hash = "login"
+            }
+          , error: function(res) {
+            }
+        })
     }
 })
 
@@ -83,6 +121,7 @@ PostFormModel = Backbone.Model.extend({
         owner:'Nobody'
       , missions: []
       , images: []
+      , video: ''
     }
   , url: function() {
         return EvilEgo.dataHost+'/post/'+this.get('owner')

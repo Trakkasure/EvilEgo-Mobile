@@ -2,12 +2,14 @@
     <form action="#addPost" method="post" id="post_form" class="wall_post">
         <input type="hidden" name="player" value="${owner}">
 
-        <label for="title" for="title">Title</label>
-        <input type="text" name="title" class="title_input" placeholder="What is this about?" />
+        <input type="text" name="title" class="title_input" placeholder="Title" />
 
         <textarea name="post" placeholder="Tell your story..."></textarea>
 
-        <a href="#" data-role="button" data-icon="plus" data-inline="true" id="add-image-button">Add Image</a>
+        <a href="#" data-role="button" data-icon="plus" data-inline="true" id="add-image-button">Image</a>
+        <!--
+        <a href="#" data-role="button" data-icon="plus" data-inline="true" id="add-video-button">Video</a>
+        -->
         <a href="#" data-role="button" data-icon="check" data-inline="true" data-theme="b" id="save-post">Save Post</a>
         {{if missions.length>0}}
         <!-- Challenge-->
@@ -23,6 +25,12 @@
         {{/if}}
 
         <div id="uploaded_images"> </div>
+        <div id="uploaded_videos"> </div>
+        
+        <form method="post" action="http://api2.transloadit.com/assemblies" enctype="multipart/form-data" id="video_upload_form">
+            <input type="hidden" name="params" value="">
+            <input type="file" name="my_file" id="video_upload_file_select">
+        </form>
 
         <br style="clear: both">
     </form>

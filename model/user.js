@@ -9,18 +9,13 @@ UserModel = Backbone.Model.extend({
         if (defaults && 'object' === typeof(defaults))
             this.set(defaults)
     }
-  , authenticate: function(success,fail) {
-        if ('' == this.get('login')) return fail('No login name')
-        $.ajax({
+  , authenticate: function() {
+        var d = $.Deferred()
+        if ('' == this.get('login')) return d.fail('No login name')
+        return $.ajax({
             url: this.url()+'/authenticate'
           , type: "POST"
           , data: "password="+this.get('password')
-          , success: function(data) {
-              success(new PlayerModel(data))
-            }
-          , error: function(res) {
-              fail(res.responseText)
-          }
         })
     }
   , url: function() {

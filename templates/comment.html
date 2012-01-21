@@ -9,8 +9,13 @@
 
         <div class="date">posted ${prettyDate}</div>
 
-        <div class="post-delete-container">
-            <a href="#" data-role="button" data-icon="delete" class="post-delete-comment" >Delete</a>
+    {{if canDelete}}
+        <div class="comment-delete-container">
+            <div style='position: relative'>
+                <a href="#" data-role="button" data-icon="delete" data-inline="true" class="comment-delete" >Delete</a>
+            </div>
         </div>
+    {{/if}}
+
         <br style="clear: both" />
     </div>

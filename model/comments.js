@@ -6,10 +6,26 @@ CommentModel = Backbone.Model.extend({
   , initialize: function(defaults) {
         if (defaults && 'object' === typeof(defaults))
             this.set(defaults)
-        _.bindAll(this,'url')
+        _.bindAll(this,'url','remove')
+        // Used in the template to show/hide the point voting section
+        if (this.get('player'))
+            this.set({
+                canDelete: (this.get('player').toLowerCase() == EvilEgo.currentUser.toLowerCase())
+            })
     } 
+  , remove: function() {
+        console.log(this.get('canDelete'))
+        if (this.get('canDelete'))
+            return this.destroy()
+        else {
+            console.log('Cannot delete')
+            var d = $.Deferred()
+            d.fail()
+            return d
+        }
+    }
   , url: function() {
-      return EvilEgo.dataHost+'/post/'+this.get('_id')
+      return EvilEgo.dataHost+'/post/'+this.get('post_id')+'/'+this.get('_id')
     }
 })
 
@@ -24,12 +40,25 @@ CommentCollection = Backbone.Collection.extend({
         }
         _.bindAll(this,'fetchComments', 'url')
     }
-  , fetchComments: function(player) {
-        //console.log('Fetching posts for '+player)
+  , fetchComments: function(page) {
         var self = this
-        this.trigger('loading')
-        this.fetch({success: function(){self.trigger('load_done')},error: function(err) {self.trigger('load_error')}})
-        return this
+        console.log('Fetching comments for '+this.post_id)
+        //self.reset([],{silent:true}) // clear the contents and throw events.
+        if (navigator.notificationEx)
+            navigator.notificationEx.loadingStart({labelText:'Getting comments...'})
+        var d = this.fetch({data:{page:page||0}}).done(function() {
+            console.log('Done loading comments')
+            clearTimeout(self.fetchTimer)
+            self.fetchTimer = null
+            if (navigator.notificationEx)
+                navigator.notificationEx.loadingStop()
+        }).error(function(e) {
+            console.log('Fail loading comments')
+            if (navigator.notificationEx)
+                navigator.notificationEx.loadingStop()
+        })
+        this.fetchTimer = setTimeout(d.fail,30000)
+        return d
     }
   , url: function() {
         return EvilEgo.dataHost+'/post/'+this.post_id+'/comment'
