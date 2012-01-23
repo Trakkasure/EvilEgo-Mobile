@@ -96,12 +96,14 @@ getTemplate('templates/comment.html','commentTemplate')
 CommentListView = Backbone.View.extend({
     el: $('#comments')
   , events: {
-        'click #new-comment-button': 'newComment'
+        'tap #new-comment-button': 'newComment'
       //, 'swipeleft'          : 'swipeleft'
     }
   , template: '#commentListTemplate'
-  , initialize: function(collection) {
-        _.bindAll(this, 'render', 'appendComment', 'newComment','removeComment') // remember: every function that uses 'this' as the current object should be in here
+  , initialize: function() {
+        _.bindAll(this, 'setCollection', 'fetch', 'render', 'appendComment', 'newComment','removeComment','promise') // remember: every function that uses 'this' as the current object should be in here
+    }
+  , setCollection: function(collection) {
         EvilEgo.collections.CommentCollection = collection
         if (collection) {
             this.collection = collection
@@ -109,6 +111,21 @@ CommentListView = Backbone.View.extend({
             this.collection.bind('remove', this.removeComment) // collection event binder
             this.collection.bind('reset',this.render)
         }
+    }
+  , fetch: function() {
+        if (navigator.notificationEx)
+            navigator.notificationEx.loadingStart({labelText:'Getting comments...'})
+        return this.collection.fetchComments().done(function() {
+            //console.log('Processing loaded comments')
+            if (window.location.hash != 'comments')
+                window.location.hash = 'comments'
+            self.fetchTimer = null
+            if (navigator.notificationEx)
+                setTimeout(navigator.notificationEx.loadingStop,500)
+        }).error(function(e) {
+            if (navigator.notificationEx)
+                setTimeout(navigator.notificationEx.loadingStop,500)
+        })
     }
   , appendComment: function(comment,collection) {
         if (!collection && this.collection.models.indexOf(comment)==-1) {
@@ -137,22 +154,44 @@ CommentListView = Backbone.View.extend({
         $('ul li#'+post.get('_id')).remove() // remove from the view
         return this
     }
-  , newComment: function() {
-        new CommentFormView({model: new CommentFormModel({player: EvilEgo.currentLogin, post_id: this.collection.post_id})})
+  , newComment: function(e) {
+        if (e) {
+            e.stopPropagation()
+            e.preventDefault()
+        }
+        //console.log("Adding comment to: "+this.collection.post_id)
+        CommentFormView.getView({model: new CommentFormModel({player: EvilEgo.currentLogin, post_id: this.collection.post_id})}).render()
         window.location.hash = 'new-comment'
     }
+  , promise: function(p) {
+        if (p)
+            this.promise = p
+        return this.promise
+    }
   , render: function() {
+      //console.log('Render Comment View')
         $('#comments-container',this.el).html($.tmpl($(this.template).html(),{}))
         if (this.collection.models.length == 0) return
         _(this.collection.models).each(function(post){ // iterate the post models
             this.appendComment(post,this.collection) // append the models
         },this)
-        $(this.el).trigger('create')
+        $('#comments-container', this.el).trigger('create')
         return this
     }
 })
+var StaticListView = null
+CommentListView.getView = function (collection) {
+
+    if (!StaticListView)
+        StaticListView = new CommentListView()
+
+    if (collection)
+        StaticListView.setCollection(collection)
+    return StaticListView
+}
 
 getTemplate('templates/commentForm.html','commentFormTemplate')
+
 CommentFormView = Backbone.View.extend({
     el: $('#new-comment')
   , events: {
@@ -166,9 +205,6 @@ CommentFormView = Backbone.View.extend({
         _.bindAll(this, 'render', 'submitComment', 'updateCommentText') // remember: every function that uses 'this' as the current object should be in here
         //this.model.bind('change',this.render)
         var self = this
-        //console.log('fetching')
-        //this.model.fetch().done(function(){self.render()})
-        this.render()
     }
   , back: function() {
         history.back()
@@ -180,6 +216,7 @@ CommentFormView = Backbone.View.extend({
         } catch (e) {
             console.log(e.description)
         }
+        $('#new-comment-container',this.el).trigger('create')
         return this
     }
   , submitComment: function(e) {
@@ -190,7 +227,7 @@ CommentFormView = Backbone.View.extend({
         if (EvilEgo.disableEvents || EvilEgo.lastEventTimestamp == e.timeStamp) return
         EvilEgo.lastEventTimestamp = e.timeStamp
         EvilEgo.disableEvents = true
-        console.log('Saving comment')
+        //console.log('Saving comment to post: '+this.model.get('post_id'))
         var self = this
         this.updateCommentText($('textarea[name="comment"]',this.el).val())
         if (navigator.notificationEx)
@@ -226,3 +263,19 @@ CommentFormView = Backbone.View.extend({
             this.model.set({comment: e})
     }
 })
+var StaticFormView = null
+CommentFormView.getView = function (options) {
+
+    if (!StaticFormView)
+        StaticFormView = new CommentFormView()
+
+    if (options && options.model)
+        StaticFormView.model = options.model
+
+    if (StaticFormView.model && StaticFormView.model.get('_id')) {
+        //console.log('fetching comment to edit: '+StaticFormView.model.get('_id'))
+        StaticFormView.model.fetch().done(function(){StaticFormView.render()}) // render the updated form once the data is returned.
+    }
+
+    return StaticFormView
+}

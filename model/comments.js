@@ -14,11 +14,11 @@ CommentModel = Backbone.Model.extend({
             })
     } 
   , remove: function() {
-        console.log(this.get('canDelete'))
+        //console.log(this.get('canDelete'))
         if (this.get('canDelete'))
             return this.destroy()
         else {
-            console.log('Cannot delete')
+            //console.log('Cannot delete')
             var d = $.Deferred()
             d.fail()
             return d
@@ -42,22 +42,19 @@ CommentCollection = Backbone.Collection.extend({
     }
   , fetchComments: function(page) {
         var self = this
-        console.log('Fetching comments for '+this.post_id)
+        //console.log('Fetching comments for '+this.post_id)
         //self.reset([],{silent:true}) // clear the contents and throw events.
-        if (navigator.notificationEx)
-            navigator.notificationEx.loadingStart({labelText:'Getting comments...'})
+        var fetchTimer = null
         var d = this.fetch({data:{page:page||0}}).done(function() {
-            console.log('Done loading comments')
-            clearTimeout(self.fetchTimer)
-            self.fetchTimer = null
-            if (navigator.notificationEx)
-                navigator.notificationEx.loadingStop()
+            if (fetchTimer)
+                clearTimeout(fetchTimer)
+            //console.log('Done loading comments')
         }).error(function(e) {
-            console.log('Fail loading comments')
-            if (navigator.notificationEx)
-                navigator.notificationEx.loadingStop()
+            if (fetchTimer)
+                clearTimeout(fetchTimer)
+            //console.log('Fail loading comments')
         })
-        this.fetchTimer = setTimeout(d.fail,30000)
+        fetchTimer = setTimeout(d.fail,30000) // 30 seconds.
         return d
     }
   , url: function() {

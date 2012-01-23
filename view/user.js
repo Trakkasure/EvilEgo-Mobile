@@ -24,7 +24,6 @@ LoginView = Backbone.View.extend({
             if (o.get('login')!=val)
                 $('#loginName').val(val)
         })
-        window.location.hash = "login"
     }
   , render: function() {
         $(this.el).html($.tmpl(this.template,this.model.toJSON())).trigger('create')
@@ -43,10 +42,9 @@ LoginView = Backbone.View.extend({
             clearTimeout(networkTimer) // clear the network timeout timer.
             $('.error', this.el).empty()
             if (navigator.notificationEx) {
-                navigator.notificationEx.loadingStop()
+                setTimeout(navigator.notificationEx.loadingStop,500)
             }
             var o_player = new PlayerModel(data)
-            //console.log('Current User:'+data.login)
             EvilEgo.currentUser  = data.login
             EvilEgo.loggedInUser = data
             if (self.model.get('save') && typeof (window.localStorage) != 'undefined') {
@@ -62,9 +60,10 @@ LoginView = Backbone.View.extend({
             },50)
             //pv.render()
         }).error(function(error) {
-            navigator.notificationEx.loadingStop()
-            //console.log(JSON.stringify(error))
-            $('.error', this.el).html((error&&error.description)||error||'An error occrued while communicating with the server')
+            if (navigator.notificationEx)
+                navigator.notificationEx.loadingStop()
+            console.log(JSON.stringify(error))
+            $('.error', this.el).html((error&&error.responseText)||error||'An error occrued while communicating with the server')
         })
     }
   , setLogin: function(e)  {

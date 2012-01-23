@@ -20,7 +20,7 @@ PostModel = Backbone.Model.extend({
           , newComments : 0
         })
         //console.log(this.get('canDelete'))
-        _.bindAll(this,'addPoint','removePoint','remove','url','getComments')
+        _.bindAll(this,'addPoint','removePoint','remove','url')
     } 
   , addPoint: function() {
         var self = this
@@ -39,16 +39,11 @@ PostModel = Backbone.Model.extend({
   , remove: function() {
         if (this.get('canDelete'))
             return this.destroy().done(function() {
-                console.log('Delete done')
+                //console.log('Delete done')
             }).error(function() {
-                console.log('Delete error')
+                //console.log('Delete error')
             })
         else return $.Deferred().fail()
-    }
-  // Isolate means to not set the global CommentCollection.
-  , getComments: function(isolate) {
-        var cm = new CommentCollection({post_id: this.get('_id')})
-        return cm
     }
   , url: function() {
       return EvilEgo.dataHost+'/post/'+this.get('_id')
@@ -82,20 +77,14 @@ PostCollection = Backbone.Collection.extend({
             case 'newsfeed':
                 if (this.fetchTimer) return
                 this.url = EvilEgo.dataHost+'/user/'+(this.lastPlayer||EvilEgo.loggedInUser.get('login'))+'/newsfeed'
-                if (navigator.notificationEx)
-                    navigator.notificationEx.loadingStart({labelText:'Getting Newsfeed...'})
                 var d = this.fetch({data:{page:page||0},add:(page&&page>0)}).done(function(data) {
-                    //console.log('Resetting newsfeed')
-                    //self.reset([],{silent:true}) // clear the contents and throw events.
-                    console.log('Done fetching newsfeed')
+                    //console.log('Done fetching newsfeed')
                     clearTimeout(self.fetchTimer)
                     self.fetchTimer = null
-                    if (navigator.notificationEx)
-                        navigator.notificationEx.loadingStop()
                 }).error(function() {
-                    console.log('Failed fetching newsfeed')
-                    if (navigator.notificationEx)
-                        navigator.notificationEx.loadingStop()
+                    //console.log('Failed fetching newsfeed')
+                    clearTimeout(self.fetchTimer)
+                    self.fetchTimer = null
                 })
                 this.fetchTimer = setTimeout(d.fail,30000) // 30 second timeout for getting newsfeeds
                 return d
@@ -107,11 +96,6 @@ PostCollection = Backbone.Collection.extend({
         return $.ajax({
             url: '/logout'
           , type: "get"
-          , success: function(data) {
-                window.location.hash = "login"
-            }
-          , error: function(res) {
-            }
         })
     }
 })

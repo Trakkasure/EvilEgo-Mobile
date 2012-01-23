@@ -27,7 +27,7 @@ PostView = Backbone.View.extend({
         if (!this.deleteOn && !this.menuOn) {
             // when the view is created in the PostListView, the collection is assocaited with the post model
             this.collection.trigger('hideMenus')
-            console.log('Showing menu')
+            //console.log('Showing menu')
             this.showMenu((e.pageX || e.clientX)?e:e.originalEvent) // on the iPhone hardware, the originalEvent doesn't contain the tap cooids
             this.menuTimer = setTimeout(this.hideMenus,5000)
         } else {
@@ -70,24 +70,6 @@ PostView = Backbone.View.extend({
         dc.show()
         return this
     }
-  , showComments: function(e) {
-        console.log('Show comments')
-        if (e) {
-            e.stopPropagation()
-            e.preventDefault()
-        }
-        var self = this
-        var cm = this.model.getComments()
-        var cv = new CommentListView(cm)
-        this.hideMenus()
-        cm.fetchComments().done(function() {
-            console.log('Processing loaded comments')
-            window.location.hash = 'comments'
-        }).error(function(e) {
-            //alert(JSON.stringify(e))
-        })
-        return this
-    }
   , showImages: function(e) {
         if (!this.model.get('images').length) return // return if there are no images.
         e.stopPropagation()
@@ -96,17 +78,33 @@ PostView = Backbone.View.extend({
         var pv = new ImageView(this.model,this.model.get('images').indexOf(src))
         window.location.hash = "photo"
     }
+  , showComments: function(e) {
+        if (e) {
+            e.stopPropagation()
+            e.preventDefault()
+        }
+        //console.log('Show comments')
+        var self = this
+        var cm = new CommentCollection({post_id: this.model.get('_id')})
+        var cv = CommentListView.getView(cm)
+        cv.fetch().done(function() {
+            if (window.location.hash != 'comments')
+                window.location.hash = 'comments'
+        })
+        this.hideMenus()
+        return this
+    }
   , addComment: function(e) {
         if (e) {
             e.stopPropagation()
             e.preventDefault()
         }
         this.hideMenus()
-        new CommentFormView({model: new CommentFormModel({post_id: this.model.get('_id')})})
+        CommentFormView.getView({model: new CommentFormModel({post_id: this.model.get('_id')})}).render()
+        var cm = new CommentCollection({post_id: this.model.get('_id')})
+        var cv = CommentListView.getView(cm)
         window.location.hash = 'new-comment'
-        var cm = this.model.getComments()
-        var cv = new CommentListView(cm)
-        cm.fetch()
+        cv.promise(cm.fetchComments())
         return this
     }
   , swipeleft: function(e) {
@@ -128,10 +126,10 @@ PostView = Backbone.View.extend({
             e.preventDefault()
             e.stopPropagation()
         }
-        console.log('Swiperight')
+        //console.log('Swiperight')
         this.collection.trigger('hideMenus')
         if (!this.deleteOn && this.model.get('canDelete')) {
-            console.log('CanDelete')
+            //console.log('CanDelete')
             var self = this
             EvilEgo.disableEvents = true
             setTimeout(function() {
@@ -164,8 +162,8 @@ PostView = Backbone.View.extend({
         this.hideMenus()
         var self = this
         this.model.remove().done(function() {
-            console.log('Remove done')
-            console.log(self.el)
+            //console.log('Remove done')
+            //console.log(self.el)
             $(self.el).remove()
             if (navigator.notificationEx)
                 navigator.notificationEx.loadingStop()
@@ -173,7 +171,6 @@ PostView = Backbone.View.extend({
             if (navigator.notificationEx)
                 navigator.notificationEx.loadingStop()
         })
-        //}
         return this
     }
   , pointsChange: function() {
@@ -240,34 +237,34 @@ getTemplate('templates/post.html','postTemplate')
 PostListView = Backbone.View.extend({
     el: $('#newsfeed')
   , events: {
-        'tap #new-post-button': 'newPost'
-      , 'tap #refresh-post-button': 'fetch'
-      , 'tap #logout-button': 'logout'
+            'tap #new-post-button': 'newPost'
+          , 'tap #refresh-post-button': 'fetch'
+          , 'tap #logout-button': 'logout'
     }
   , initialize: function(collection){
-        _.bindAll(this, 'render', 'logout', 'newPost', 'appendPost','removePost') // remember: every function that uses 'this' as the current object should be in here
-        this.template = '#postListTemplate'
-        $('#newsfeed-container',this.el).empty()
-        if (!collection) collection = EvilEgo.collections.PostCollection
-        if (collection) {
-            this.collection = EvilEgo.collections.PostCollection = collection
-            this.collection.bind('add', this.render) // collection event binder
-            this.collection.bind('remove',this.removePost)
-            //this.collection.bind('destroy',this.removePost)
-            this.collection.bind('reset',this.render)
-            this.collection.bind('change',function(){console.log('Change event on collection')})
-        }
+            _.bindAll(this, 'render', 'logout', 'newPost', 'appendPost','removePost') // remember: every function that uses 'this' as the current object should be in here
+            this.template = '#postListTemplate'
+            $('#newsfeed-container',this.el).empty()
+            if (!collection) collection = EvilEgo.collections.PostCollection
+            if (collection) {
+                this.collection = EvilEgo.collections.PostCollection = collection
+                this.collection.bind('add', this.render) // collection event binder
+                this.collection.bind('remove',this.removePost)
+                //this.collection.bind('destroy',this.removePost)
+                this.collection.bind('reset',this.render)
+                //this.collection.bind('change',function(){console.log('Change event on collection')})
+            }
     }
   , logout: function() {
-        this.collection.logout()
+        this.collection.logout().done(function(){window.location.hash='login'})
     }
   , appendPost: function(post,collection){
         if (!collection && this.collection.models.indexOf(post)==-1) {
-            console.log('Post not in collection. Adding...')
+            //console.log('Post not in collection. Adding...')
             this.collection.add(post) // we weren't called by an event
         } else {
             if (post.collection && (post.collection != this.collection)) {
-                console.log('Post in another collection. Removing and adding to this one.')
+                //console.log('Post in another collection. Removing and adding to this one.')
                 post.collection.remove(post) // remove from other collection
                 return this.collection.add(post) // add to our collection
             }
@@ -281,20 +278,21 @@ PostListView = Backbone.View.extend({
     }
   , removePost: function(post,collection) {
         if (!collection) {
-            console.log('Post still in collection. Removing.')
+            //console.log('Post still in collection. Removing.')
             this.collection.remove(post) // we weren't called by an event
         } else {
-            console.log('remove post')
+            //console.log('remove post')
         }
         $('ul li#'+post.get('_id')).remove() // remove from the view
         return this
     }
   , newPost: function() {
+      //console.log("New Post")
         new PostFormView({model: new PostFormModel({owner: EvilEgo.currentUser})})
         window.location.hash = 'new-post'
     }
   , render: function() {
-      console.log('Rendering post list')
+        //console.log('Rendering post list')
         $('#newsfeed-container',this.el).html($.tmpl($(this.template).html(),{}))
         if (this.collection.models.length == 0) return
         var self = this
@@ -305,9 +303,17 @@ PostListView = Backbone.View.extend({
         setTimeout(function(){$(self.el).trigger('create')},100)
         return this
     }
-  , fetch: function() {
-        this.collection.fetchPosts()
-    }
+  , fetch: _.debounce(function() {
+        if (navigator.notificationEx)
+            navigator.notificationEx.loadingStart({labelText:'Getting Newsfeed...'})
+        this.collection.fetchPosts().done(function() {
+            if (navigator.notificationEx)
+                navigator.notificationEx.loadingStop()
+        }).error(function() {
+            if (navigator.notificationEx)
+                navigator.notificationEx.loadingStop()
+        })
+    },10000) // limit refreshes from happening at least 10 seconds apart
 })
 
 getTemplate('templates/postForm.html','postFormTemplate')
@@ -332,7 +338,7 @@ PostFormView = Backbone.View.extend({
         this.model.fetch().done(function(){self.render()})
     }
   , render: function() {
-        console.log('Rendering form')
+        //console.log('Rendering form')
         try {
             //console.log(this.template)
             //console.log($('#new-post-container',this.el).html())
@@ -342,7 +348,8 @@ PostFormView = Backbone.View.extend({
         }
         var self = this
         $('#new-post-container',this.el).trigger('create')
-        $('#video_upload_form').transloadit({
+        /*
+         $('#video_upload_form').transloadit({
             wait:true, autoSubmit:false,
             onProgress: function(bytesReceived, bytesExpected) {
                 // render your own progress bar!
@@ -362,10 +369,10 @@ PostFormView = Backbone.View.extend({
                 $('#uploaded_images').append("<img src='"+thumbnail+"' alt=''>")
             }
         });
-          
+        */  
         return this
     }
-  , submitPost: function(e) {
+  , submitPost: _.debounce(function(e) {
         if (e) {
             e.stopPropagation()
             e.preventDefault()
@@ -396,7 +403,7 @@ PostFormView = Backbone.View.extend({
                 console.log('Error saving the post')
             EvilEgo.disableEvents = false
         })
-    }
+    },2000)
   , updateTitle: function(e) {
         if (e && e.currentTarget)
             this.model.set({title: e.currentTarget.value})
@@ -409,7 +416,7 @@ PostFormView = Backbone.View.extend({
         else if (e)
             this.model.set({post: e})
     }
-  , selectImage: function(e) {
+  , selectImage: _.debounce(function(e) {
         if (e) {
             e.stopPropagation()
             e.preventDefault()
@@ -442,12 +449,12 @@ PostFormView = Backbone.View.extend({
                 options.params = params
                 options.chunkedMode = false
      
-                console.log('ImageURI:'+imageURI)
+                //console.log('ImageURI:'+imageURI)
                 var a_img = imageURI.split('/')
                 var localURI = a_img.pop()
                 localURI = a_img.pop() + '/'+ localURI
-                console.log('ImageURI:')
-                console.log(localURI)
+                //console.log('ImageURI:')
+                //console.log(localURI)
                 var img = $('<img src="../../'+localURI+'" style="height: 128px; overflow: crop;margin:5px" />')
                 var width = parseInt($(img).css('width'))
                 var offset = -50 - (width/2)
@@ -460,7 +467,7 @@ PostFormView = Backbone.View.extend({
                     if (el) el.show()
                     try {
                         navigator.notificationEx.loadingStop()
-                        console.log('Upload complete')
+                        //console.log('Upload complete')
                         var data = JSON.parse(results.response)
                         self.model.get('images').push(data.data)
                         $('#uploaded_images').append('<input type="hidden" name="images[]" value="'+data.data+'" />')
@@ -470,7 +477,7 @@ PostFormView = Backbone.View.extend({
                         loader.remove()
                         img.remove()
                         if (navigator.notification) navigator.notification.alert("An error occurred while processing upload response.")
-                        console.log(JSON.stringify(e))
+                        //console.log(JSON.stringify(e))
                     }
                 }
                 var f = function(error) {
@@ -493,8 +500,8 @@ PostFormView = Backbone.View.extend({
               , allowEdit       : true
             })
         })
-    }
-  , selectVideo: function(e) {
+    },2000)
+  , selectVideo: _.debounce(function(e) {
         //console.log('Selecting video')
         //console.log(JSON.stringify(navigator.camera.PictureSourceType))
         var self = this
@@ -519,7 +526,7 @@ PostFormView = Backbone.View.extend({
             var img = $('<video height="128"><source src="'+imageURI+'" type="video/3gp" /></video>')
             var width = $(img).css('width')
             var x = (width/2()+50)*-1
-            console.log('X: '+x)
+            //console.log('X: '+x)
             var loader = $('<img src="images/loading_sm_icon.gif" style="width:32px;position:relative;top:-45px;left:'+x+'px" />')
 
             $('#uploaded_video').append(img)
@@ -540,7 +547,7 @@ PostFormView = Backbone.View.extend({
           , mediaType       : navigator.camera.MediaType.VIDEO
         })
 
-    }
+    },2000)
   , enableMissions: function(e) {
         $(e.currentTarget).hide()
         $('#challenge').show()
