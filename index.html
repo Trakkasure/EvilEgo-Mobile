@@ -7,27 +7,24 @@
         
         <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0/jquery.mobile-1.0.min.css" />
         <link rel="stylesheet" href="css/core.css" />
+            <!-- iPad/iPhone specific css below, add after your main css >
         <link rel="stylesheet" type="text/css" href="http://assets.transloadit.com/css/transloadit2.css" />
 
-        <!-- iPad/iPhone specific css below, add after your main css >
         <link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />		
         <link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />		
-        -->
-        <!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
-        <script src="js/jquery.min.js"></script>
+         -->
+
+            <script src="js/jquery.min.js"></script>
         <script src="js/jquery.mobile-1.0.min.js"></script>
         <script type="text/javascript" src="js/underscore-min.js"></script>
         <script type="text/javascript" src="js/json2.js"></script>
-        <script type="text/javascript" charset="utf-8" src="phonegap-1.2.0.js"></script>
+        <script type="text/javascript" charset="utf-8" src="phonegap-1.3.0.js"></script>
         <script type="text/javascript" charset="utf-8" src="../phonegap-1.2.0.js"></script>
         <script type="text/javascript" charset="utf-8" src="js/notificationex.js"></script>
-        <script type="text/javascript" charset="utf-8" src="js/ChildBrowser.js"></script>
         <script type="text/javascript" src="js/backbone-min.js"></script>
-        <script type="text/javascript" src="js/jquery.transloadit2.js"></script>
         <script type="text/javascript" src="js/notifier.js"></script>
 
         <script type="text/javascript">
-
             Hoptoad.setKey('fb1f4b34303ea8084ce3a69743b31fc9')
             Hoptoad.setEnvironment('mobile')
             Hoptoad.setErrorDefaults({
@@ -35,20 +32,38 @@
               , component: "mobile"
               , action: "show"
             })
-
-            window.onerror = function(message,file,line) {
+            var errorTimeout = []
+            window.onorientationchange = function() {
+                if (errorTimeout.length) 
+                    while(errorTimeout.length) clearTimeout(errorTimeout.pop())
+            }
+            // Debounce to limit the amount of reporting that occurs.
+            window.onerror = _.debounce(function(message,file,line) {
+                var args = arguments
+                // These happen all the time from the phonegap system. Can't prevent this.
+                console.log("Exception: "+message)
+                if (message === "TypeError: 'undefined' is not a function") return false
+                errorTimeout.push(setTimeout(function() {
+                if (navigator.notification) 
+                   navigator.notification.alert("An unexpected error occured.\n"+message+"\n"+file+"\n"+line,function(){location.reload()})
+                else alert('An unexpected error occured.')
+                console.log("Exception argument count:"+args.length)
+                _(args).each(function(item) {
+                    console.log(JSON.stringify(item))
+                })
+                /*
                 Hoptoad.notify({
                     message : message
                   , stack   : '()@' + file + ':' + line
                 }).done(function() {
-                    if (navigator.notification) navigator.notification.alert("An unexpected error occured.",function(){location.reload()})
-                    else alert('An unexpected error occured.')
+                    console.log('Error occured. Airbrake notified')
                 }).error(function() {
-                    if (navigator.notification) navigator.notification.alert("An unexpected error occured.",function(){location.reload()})
-                    else alert('An unexpected error occured.')
+                    console.log('Error occured. Could not notify Airbrake.')
                 })
+                */
+                },1000))
                 return false
-            }
+            },2000)
             // If you want to prevent dragging, uncomment this section
             function preventBehavior(e) {
                 e.preventDefault(); 
@@ -86,6 +101,8 @@
             var lastLogin = {}
               , root = this
               , childBrowser = null
+              , loaded = $.Deferred()
+
             _ready.done(function () {
                 // do your thing!
                 //if (navigator.notification) navigator.notification.alert("PhoneGap is working")
@@ -93,16 +110,6 @@
                 // First thing to do is to get the user's stored mobile login token, if there is one. otherwise we will ask them ot log in.
                 // var db = window.openDatabase("EvilEgo", "1.0", "EvilEgo Local Storage", 200000);
 
-                //childBrowser = ChildBrowser.install(); 
-
-                var cb = childBrowser = ChildBrowser.install()
-                if(cb != null) { 
-                    cb.onLocationChange = function(loc) { 
-                        root.locChanged(loc)
-                    } 
-                    cb.onClose = function(){root.onCloseBrowser()}
-                    cb.onOpenExternal = function(){root.onOpenExternal()}
-                }
                 if (window.localStorage) {
                     var x = window.localStorage.getItem('lastLogin')
                     if (x) {
@@ -198,7 +205,7 @@
                     <a href="#new-comment" data-theme="a" data-role="button" data-icon="plus" data-inline="true" id="new-comment-button"></a>
                 </div>
                 <div class="header-button left">
-                    <a href="#newsfeed" data-theme="a" data-role="button" data-icon="back" data-inline="true"></a>
+                    <a href="#newsfeed" data-theme="a" data-role="button" data-icon="back" data-inline="true" id="comment-go-back"></a>
                 </div>
                 <div class='logo'><img src="images/logo_horizontal_sm.png" alt="EvilEgo.com"></div> 
             </div> 
@@ -292,6 +299,7 @@
         console.log=logCatcher
 
     </script>
+    
     <script src="js/jquery.tmpl.min.js"></script>
     <script src="model/user.js"></script>
     <script src="view/user.js"></script>
@@ -302,10 +310,8 @@
     <script src="model/comments.js"></script>
     <script src="view/comments.js"></script>
     <script src="view/photo.js"></script>
-    <script src="js/jquery.infinitescroll.min.js"></script>
     <script type="text/javascript">
         //Backbone.history.start()
-        loaded = $.Deferred()
         $.when(loaded).done(function(data) {
             //Backbone.history.start()
             console.log('Load complete. Display login form')
@@ -313,8 +319,39 @@
             if (navigator && navigator.splashscreen && navigator.splashscreen.hide)
                 navigator.splashscreen.hide()
             sameOrigin = window.location.origin
-            EvilEgo.dataHost = (DeviceInfo&&DeviceInfo.platform)?'http://mobile.evilego.com:4000':sameOrigin
-            //EvilEgo.dataHost ='http://mobile.evilego.com:4000'
+            EvilEgo.dataHost = (window['DeviceInfo']&&DeviceInfo.platform)?'http://mobile.evilego.com:4000':sameOrigin
+
+            if (EvilEgo.currentUser && EvilEgo.currentUser != '') {
+                var d = $.ajax({
+                    url: EvilEgo.dataHost+'/user/'+EvilEgo.currentUser+'/checkSession'
+                  , type: "get"
+                })
+                var networkTimer = setTimeout(d.fail,10000)
+                d.done(function(data) {
+                    clearTimeout(networkTimer)
+                    if (data && data.login == EvilEgo.currentUser) {
+                        EvilEgo.loggedInUser = data
+                        var pc = new PostCollection('newsfeed')
+                        var pv = new PostListView(pc)
+                        setTimeout(function() {
+                            pc.fetchPosts(EvilEgo.currentUser).done(function() {
+                                clearTimeout(networkTimer)
+                                window.location.hash = 'newsfeed'
+                            }).error(function() {
+                                clearTimeout(networkTimer)
+                                window.location.hash = 'login'
+                            })
+                            var networkTimer = setTimeout(pc.fail,10000)
+                        },50)
+                    } else
+                        window.location.hash = "login"
+                }).error(function(error) {
+                    clearTimeout(networkTimer)
+                    window.location.hash = "login"
+                })
+            } else
+                window.location.hash = "login"
+
         }).fail(function(data) {
             console.log('Error load.')
             console.log(data)
