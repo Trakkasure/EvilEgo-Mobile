@@ -1,7 +1,13 @@
-var PlayerModel = Backbone.Model.extend({
-    initialize : function(defaults) {
-        this.set(defaults)
-        _.bindAll(this,'getNewsFeed','url')
+PlayerModel =  Backbone.Model.extend({
+    defaults: {
+        user: ''
+      , password: ''
+      , save: false
+    }
+  , initialize: function(defaults) {
+        _.bindAll(this,'url', 'getNewsFeed')
+        if (defaults && 'object' === typeof(defaults))
+            this.set(defaults)
     }
   , getNewsFeed: function() {
         EvilEgo.collection.newsFeed = (new PostCollection).fetchPosts(this.login)
@@ -9,8 +15,4 @@ var PlayerModel = Backbone.Model.extend({
   , url: function() {
         return EvilEgo.dataHost+'/user/'+this.get('login')
     }
-})
-
-var Players = Backbone.Collection.extend({
-    model: PlayerModel
 })

@@ -88,7 +88,7 @@
                 //console.log('On body load')
                 console.log(PhoneGap.DeviceInfo)
                 if ('undefined' === typeof(PhoneGap) || !PhoneGap.available) {
-                    console.log('Running outside of mobile device')
+                    //console.log('Running outside of mobile device')
                     setTimeout('_ready.resolve()',2000) // delay the resolve so phonegap can call it first if it is loaded
                 }
             }
@@ -160,6 +160,8 @@
     </head>
     <body onload="onBodyLoad()" style="-webkit-user-select: none; -webkit-touch-callout: none;"> 
         <!-- LOGIN PAGE -->
+        <div data-role="page" id="blank" data-theme="a">
+        </div>
         <div data-role="page" id="login" data-theme="a">
             <div data-role="header" data-position="fixed"> 
                 <div class='logo'>
@@ -301,10 +303,10 @@
     </script>
     
     <script src="js/jquery.tmpl.min.js"></script>
-    <script src="model/user.js"></script>
-    <script src="view/user.js"></script>
     <script src="model/player.js"></script>
     <script src="view/player.js"></script>
+    <script src="model/login.js"></script>
+    <script src="view/login.js"></script>
     <script src="model/post.js"></script>
     <script src="view/post.js"></script>
     <script src="model/comments.js"></script>
@@ -314,43 +316,56 @@
         //Backbone.history.start()
         $.when(loaded).done(function(data) {
             //Backbone.history.start()
-            console.log('Load complete. Display login form')
-            Login = new LoginView ({model: new UserModel({login:EvilEgo.currentUser||'',password:lastLogin.password})})
-            if (navigator && navigator.splashscreen && navigator.splashscreen.hide)
-                navigator.splashscreen.hide()
+            Login = new LoginView ({model: new LoginModel({login:EvilEgo.currentUser||'',password:lastLogin.password})})
             sameOrigin = window.location.origin
             EvilEgo.dataHost = (window['DeviceInfo']&&DeviceInfo.platform)?'http://mobile.evilego.com:4000':sameOrigin
-
+            //console.log('Data Host: '+EvilEgo.dataHost)
             if (EvilEgo.currentUser && EvilEgo.currentUser != '') {
+                console.log('Checking session')
                 var d = $.ajax({
                     url: EvilEgo.dataHost+'/user/'+EvilEgo.currentUser+'/checkSession'
                   , type: "get"
                 })
                 var networkTimer = setTimeout(d.fail,10000)
                 d.done(function(data) {
+                    console.log('Checking session Done')
                     clearTimeout(networkTimer)
                     if (data && data.login == EvilEgo.currentUser) {
+                        console.log('Load complete. Display login form')
                         EvilEgo.loggedInUser = data
                         var pc = new PostCollection('newsfeed')
                         var pv = new PostListView(pc)
                         setTimeout(function() {
-                            pc.fetchPosts(EvilEgo.currentUser).done(function() {
+                            pv.fetchPosts(EvilEgo.currentUser).done(function() {
                                 clearTimeout(networkTimer)
+                                console.log('Newsfeed Load complete. Display newsfeed')
                                 window.location.hash = 'newsfeed'
+                                if (navigator && navigator.splashscreen && navigator.splashscreen.hide)
+                                    navigator.splashscreen.hide()
                             }).error(function() {
                                 clearTimeout(networkTimer)
+                                console.log('Newsfeed Load failed. Display login')
                                 window.location.hash = 'login'
+                                if (navigator && navigator.splashscreen && navigator.splashscreen.hide)
+                                    navigator.splashscreen.hide()
                             })
                             var networkTimer = setTimeout(pc.fail,10000)
                         },50)
-                    } else
+                    } else {
+                        console.log('Load complete. Display login form')
                         window.location.hash = "login"
+                        if (window.navigator && navigator.splashscreen && navigator.splashscreen.hide)
+                            navigator.splashscreen.hide()
+                    }
                 }).error(function(error) {
                     clearTimeout(networkTimer)
                     window.location.hash = "login"
                 })
-            } else
+            } else {
                 window.location.hash = "login"
+                if (window.navigator && navigator.splashscreen && navigator.splashscreen.hide)
+                    setTimeout(function(){navigator.splashscreen.hide()},500)
+            }
 
         }).fail(function(data) {
             console.log('Error load.')

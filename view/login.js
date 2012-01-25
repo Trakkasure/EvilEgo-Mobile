@@ -1,7 +1,3 @@
-UserView = Backbone.View.extend({
-
-})
-
 lfd = getTemplate('templates/loginForm.html','loginFormTemplate')
 
 LoginView = Backbone.View.extend({
@@ -47,6 +43,7 @@ LoginView = Backbone.View.extend({
             var o_player = new PlayerModel(data)
             EvilEgo.currentUser  = data.login
             EvilEgo.loggedInUser = data
+            EvilEgo.PlayerModel  = o_player
             if (self.model.get('save') && typeof (window.localStorage) != 'undefined') {
                 window.localStorage.setItem('lastLogin',JSON.stringify({login:EvilEgo.currentUser,password:self.model.get('password')}))
                 window.localStorage.setItem(EvilEgo.currentUser,JSON.stringify(EvilEgo.loggedInUser))
