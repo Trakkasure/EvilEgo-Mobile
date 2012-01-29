@@ -336,7 +336,7 @@
                         var pc = new PostCollection('newsfeed')
                         var pv = new PostListView(pc)
                         setTimeout(function() {
-                            pv.fetchPosts(EvilEgo.currentUser).done(function() {
+                            pv.fetch(EvilEgo.currentUser).done(function() {
                                 clearTimeout(networkTimer)
                                 console.log('Newsfeed Load complete. Display newsfeed')
                                 window.location.hash = 'newsfeed'
