@@ -20,7 +20,7 @@ PostModel = Backbone.Model.extend({
           , newComments : 0
         })
         //console.log(this.get('canDelete'))
-        _.bindAll(this,'addPoint','removePoint','remove','url')
+        _.bindAll(this,'addPoint','removePoint','remove','url','ackNotification')
     } 
   , addPoint: function() {
         var self = this
@@ -36,6 +36,16 @@ PostModel = Backbone.Model.extend({
             self.set({points:data.points})
         })
     }
+  , ackNotification: function() {
+        if (this.get('type')=='notification')
+            return this.destroy().done(function() {
+                //console.log('Delete done')
+            }).error(function() {
+                //console.log('Delete error')
+            })
+        else return $.Deferred().fail()
+    }
+
   , remove: function() {
         if (this.get('canDelete'))
             return this.destroy().done(function() {
@@ -46,7 +56,10 @@ PostModel = Backbone.Model.extend({
         else return $.Deferred().fail()
     }
   , url: function() {
-      return EvilEgo.dataHost+'/post/'+this.get('_id')
+      if (this.get('type')=='notification')
+          return EvilEgo.dataHost+'/post/'+this.get('_id')+'/notification'
+      else
+          return EvilEgo.dataHost+'/post/'+this.get('_id')
     }
 })
 
@@ -76,7 +89,7 @@ PostCollection = Backbone.Collection.extend({
         switch(this.type) {
             case 'newsfeed':
                 if (this.fetchTimer) return
-                this.url = EvilEgo.dataHost+'/user/'+(this.lastPlayer||EvilEgo.loggedInUser.get('login'))+'/newsfeed'
+                this.url = EvilEgo.dataHost+'/user/'+(this.lastPlayer||EvilEgo.loggedInUser.login)+'/newsfeed'
                 var d = this.fetch({data:{page:page||0},add:(page&&page>0)}).done(function(data) {
                     //console.log('Done fetching newsfeed')
                     clearTimeout(self.fetchTimer)
@@ -89,8 +102,9 @@ PostCollection = Backbone.Collection.extend({
                 this.fetchTimer = setTimeout(d.fail,30000) // 30 second timeout for getting newsfeeds
                 return d
             break
+            default:
+                return this
         }
-        return this
     }
   , logout: function() {
         return $.ajax({
