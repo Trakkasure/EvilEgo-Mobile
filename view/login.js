@@ -51,7 +51,7 @@ LoginView = Backbone.View.extend({
             var pc = new PostCollection('newsfeed')
             var pv = new PostListView(pc)
             setTimeout(function() {
-                pc.fetchPosts(o_player.get('login')).done(function() {
+                pv.fetch(o_player.get('login')).done(function() {
                     window.location.hash = 'newsfeed'
                 })
             },50)
