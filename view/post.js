@@ -1,3 +1,5 @@
+getTemplate('templates/post.html','postTemplate')
+
 PostView = Backbone.View.extend({
     tagName: 'li'
   , deleteOn: false
@@ -12,9 +14,10 @@ PostView = Backbone.View.extend({
       , 'tap .post-reply'  : 'addComment'
       , 'tap .post-view-comments': 'showComments'
       , 'tap'              : 'clickedContent'
+      , 'tap .notification-remove' : 'ackNotification'
     }
   , initialize: function() {
-        _.bindAll(this,'render','remove','addPoint','removePoint','pointsChange','swiperight', 'clickedContent','addComment','showComments','showMenu','showImages','hideMenus','commentsChange')
+        _.bindAll(this,'render','remove','addPoint','removePoint','pointsChange','swiperight', 'clickedContent','addComment','showComments','showMenu','showImages','hideMenus','commentsChange','ackNotification')
         this.model.bind('change:points',this.pointsChange)
         this.model.bind('change:comments',this.commentsChange)
 //        this.model.bind('hideMenus',this.hideMenus)
@@ -151,6 +154,30 @@ PostView = Backbone.View.extend({
         return this
         
     }
+  , ackNotification: function(e) {
+        if (e) {
+            e.stopPropagation()
+            e.preventDefault()
+        }
+        if (navigator.notificationEx) {
+            navigator.notificationEx.loadingStart({labelText:'Removing Notification...'})//,duration:10})
+        }
+        this.hideMenus()
+        var self = this
+        if (this.model.get('type')=='notification') {
+            var d = this.model.ackNotification().done(function() {
+                //console.log('Remove done')
+                //console.log(self.el)
+                $(self.el).remove()
+                if (navigator.notificationEx)
+                    navigator.notificationEx.loadingStop()
+            }).error(function() {
+                if (navigator.notificationEx)
+                    navigator.notificationEx.loadingStop()
+            })
+            return d
+        }
+    }
   , remove: function(e) {
         if (e) {
             e.stopPropagation()
@@ -201,14 +228,14 @@ PostView = Backbone.View.extend({
   , addPoint: function(e) {
         e.stopPropagation()
         e.preventDefault()
-        var el = $(e.currentTarget)
-        var p  = el.position()
-        var loader = $('<img src="images/loading_sm_icon.gif" />')
+        var el = $('.vote',e.currentTarget)
+        var loader = $('<img src="images/loading_sm_icon.gif" class="wait-vote-up" onclick="return false"/>')
         el.hide()
-        loader.attr('top',p.top+10)
-        loader.attr('left',p.left+10)
-        el.parent().append(loader)
+        el.parent().parent().append(loader)
         return this.model.addPoint().done(function() {
+            el.show()
+            loader.remove()
+        }).error(function() {
             el.show()
             loader.remove()
         })
@@ -216,22 +243,20 @@ PostView = Backbone.View.extend({
   , removePoint: function(e) {
         e.stopPropagation()
         e.preventDefault()
-        var el = $(e.currentTarget)
-        var p  = el.position()
-        var loader = $('<img src="images/loading_sm_icon.gif" />')
+        var el = $('.vote',e.currentTarget)
+        var loader = $('<img src="images/loading_sm_icon.gif" class="wait-vote-down" onclick="return false"/>')
         el.hide()
-        loader.attr('top',p.top+10)
-        loader.attr('left',p.left+10)
-        el.parent().append(loader)
+        el.parent().parent().append(loader)
         return this.model.removePoint().done(function() {
+            el.show()
+            loader.remove()
+        }).error(function() {
             el.show()
             loader.remove()
         })
     }
-
 })
 getTemplate('templates/postList.html','postListTemplate')
-getTemplate('templates/post.html','postTemplate')
 
 // This is the container for the list of posts
 PostListView = Backbone.View.extend({
@@ -303,17 +328,18 @@ PostListView = Backbone.View.extend({
         setTimeout(function(){$(self.el).trigger('create')},100)
         return this
     }
-  , fetch: _.debounce(function() {
+  , fetch: function() {
         if (navigator.notificationEx)
             navigator.notificationEx.loadingStart({labelText:'Getting Newsfeed...'})
-        this.collection.fetchPosts().done(function() {
+        var d=this.collection.fetchPosts().done(function() {
             if (navigator.notificationEx)
                 navigator.notificationEx.loadingStop()
         }).error(function() {
             if (navigator.notificationEx)
                 navigator.notificationEx.loadingStop()
         })
-    },10000) // limit refreshes from happening at least 10 seconds apart
+        return d
+    }
 })
 
 getTemplate('templates/postForm.html','postFormTemplate')
@@ -403,7 +429,7 @@ PostFormView = Backbone.View.extend({
                 console.log('Error saving the post')
             EvilEgo.disableEvents = false
         })
-    },2000)
+    },200)
   , updateTitle: function(e) {
         if (e && e.currentTarget)
             this.model.set({title: e.currentTarget.value})
@@ -500,7 +526,7 @@ PostFormView = Backbone.View.extend({
               , allowEdit       : true
             })
         })
-    },2000)
+    },200)
   , selectVideo: _.debounce(function(e) {
         //console.log('Selecting video')
         //console.log(JSON.stringify(navigator.camera.PictureSourceType))
@@ -547,7 +573,7 @@ PostFormView = Backbone.View.extend({
           , mediaType       : navigator.camera.MediaType.VIDEO
         })
 
-    },2000)
+    },200)
   , enableMissions: function(e) {
         $(e.currentTarget).hide()
         $('#challenge').show()
