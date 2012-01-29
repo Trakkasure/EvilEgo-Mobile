@@ -3,21 +3,26 @@
 {{/if}}
     {{if canVote }}
         <div class="points">
-            <span class="pointValue">${points}</span> points
+            <span class="points-text"><span class="pointValue">${points}</span> points</span>
 
             <!-- VOTE-->
             <!-- VOTE UP-->
             <a href="#" class="vote_up">
-                <img src="images/core/icon_vote_up.png">
+                <img src="images/core/icon_vote_up.png" class="vote">
             </a>
 
             <!-- VOTE DOWN-->
             <a href="#" class="vote_down">
-                <img src="images/core/icon_vote_down.png">
+                <img src="images/core/icon_vote_down.png" class="vote">
             </a>
         </div>
     {{/if}}
 
+    {{if type=='challenge'}}
+        <div class="mission-info">
+            <b>Mission:</b> <span class="mission-title">${related.title}</span>
+        </div>
+    {{/if}}
     <!-- AVATAR -->
     <a href="#" class="post_avatar show_mini">
         <img src="http://evilego.com/avatars/${owner}_icon.png">
@@ -32,9 +37,14 @@
     
     <!-- BODY -->
     <div class="post-body">
-        {{html post}}
+        {{if (type=='notification')}}
+            <span class="notification-remove">Remove notfication</span>
+        {{else}}
+            {{html post}}
+        {{/if}}
     </div>
     
+    {{if (type!='notification')}}
     {{if canDelete}}
         <div class="post-delete-container">
             <div style='position: relative'>
@@ -60,6 +70,7 @@
         <a href="#newComment" class="post-reply">
             0 comments
         </a>
+        {{/if}}
         {{/if}}
     </div>
     <div class="date">
