@@ -115,17 +115,23 @@ CommentListView = Backbone.View.extend({
   , fetch: function() {
         if (navigator.notificationEx)
             navigator.notificationEx.loadingStart({labelText:'Getting comments...'})
-        return this.collection.fetchComments().done(function() {
+        var fetchTimer = null
+        var d = this.collection.fetchComments().done(function() {
             //console.log('Processing loaded comments')
+            if (fetchTimer)
+                clearTimeout(fetchTimer)
             if (window.location.hash != 'comments')
                 window.location.hash = 'comments'
-            self.fetchTimer = null
             if (navigator.notificationEx)
                 setTimeout(navigator.notificationEx.loadingStop,500)
         }).error(function(e) {
+            if (fetchTimer)
+                clearTimeout(fetchTimer)
             if (navigator.notificationEx)
                 setTimeout(navigator.notificationEx.loadingStop,500)
         })
+        fetchTimer = setTimeout(d.fail,30000) // 30 seconds.
+        return d
     }
   , appendComment: function(comment,collection) {
         if (!collection && this.collection.models.indexOf(comment)==-1) {
@@ -247,6 +253,7 @@ CommentFormView = Backbone.View.extend({
             if (navigator.notificationEx)
                 navigator.notificationEx.loadingStop()
             navigator.notification.alert('Error','Could not save the comment.')
+            console.log(JSON.stringify(e))
         })
 
         //.error(function(data) {
