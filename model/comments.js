@@ -44,17 +44,17 @@ CommentCollection = Backbone.Collection.extend({
         var self = this
         //console.log('Fetching comments for '+this.post_id)
         //self.reset([],{silent:true}) // clear the contents and throw events.
-        var fetchTimer = null
+        if (this.fetchTimer) return
         var d = this.fetch({data:{page:page||0}}).done(function() {
-            if (fetchTimer)
-                clearTimeout(fetchTimer)
+            if (self.fetchTimer) clearTimeout(self.fetchTimer)
+            self.fetchTimer = null
             //console.log('Done loading comments')
         }).error(function(e) {
-            if (fetchTimer)
-                clearTimeout(fetchTimer)
+            if (self.fetchTimer) clearTimeout(self.fetchTimer)
+            self.fetchTimer = null
             //console.log('Fail loading comments')
         })
-        fetchTimer = setTimeout(d.fail,30000) // 30 seconds.
+        self.fetchTimer = setTimeout(d.fail,30000) // 30 seconds.
         return d
     }
   , url: function() {

@@ -115,22 +115,16 @@ CommentListView = Backbone.View.extend({
   , fetch: function() {
         if (navigator.notificationEx)
             navigator.notificationEx.loadingStart({labelText:'Getting comments...'})
-        var fetchTimer = null
         var d = this.collection.fetchComments().done(function() {
             //console.log('Processing loaded comments')
-            if (fetchTimer)
-                clearTimeout(fetchTimer)
             if (window.location.hash != 'comments')
                 window.location.hash = 'comments'
             if (navigator.notificationEx)
                 setTimeout(navigator.notificationEx.loadingStop,500)
         }).error(function(e) {
-            if (fetchTimer)
-                clearTimeout(fetchTimer)
             if (navigator.notificationEx)
                 setTimeout(navigator.notificationEx.loadingStop,500)
         })
-        fetchTimer = setTimeout(d.fail,30000) // 30 seconds.
         return d
     }
   , appendComment: function(comment,collection) {
