@@ -1,4 +1,6 @@
 .DS*
 *~
 .gitignore
-phonegap-1.2.0.js
+phonegap-*
+*-debug.js
+css/.sass-cache
